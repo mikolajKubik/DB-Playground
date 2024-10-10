@@ -10,8 +10,9 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
-@Entity
 @ToString(callSuper = true)
+
+@Entity
 public class Motorcycle extends Vehicle {
 
     private int cylinderCapacity;

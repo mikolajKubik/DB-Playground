@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode()
+@ToString()
 //@MappedSuperclass
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)

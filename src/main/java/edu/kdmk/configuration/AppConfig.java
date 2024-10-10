@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan("edu.kdmk.repositories")
+//@ComponentScan({"edu.kdmk.repositories", "edu.kdmk.services"})
 public class AppConfig {
 
     private final EntityManagerFactory emf = Persistence.createEntityManagerFactory("my-persistence-unit");
@@ -18,18 +18,5 @@ public class AppConfig {
     @Bean
     public EntityManager entityManager() {
         return emf.createEntityManager();
-    }
-    
-    @Bean
-    public Motorcycle motorCycle() {
-        return Motorcycle.builder()
-                .licensePlate("12345")
-                .brand("Yamaha")
-                .model("R1")
-                .year(2021)
-                .price(100)
-                .cylinderCapacity(1000)
-                .power(200)
-                .build();
     }
 }

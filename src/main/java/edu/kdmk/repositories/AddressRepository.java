@@ -1,21 +1,21 @@
 package edu.kdmk.repositories;
 
-import edu.kdmk.model.Client;
+import edu.kdmk.model.Address;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @RequiredArgsConstructor
 @Repository
-public class ClientRepository implements EntityRepository<Client> {
+public class AddressRepository implements EntityRepository<Address> {
 
     private final EntityManager entityManager;
 
     @Override
-    public Client add(Client item) {
+    public Address add(Address item) {
         try{
             entityManager.getTransaction().begin();
 
@@ -30,22 +30,22 @@ public class ClientRepository implements EntityRepository<Client> {
     }
 
     @Override
-    public boolean remove(Client item) {
+    public boolean remove(Address item) {
         return false;
     }
 
     @Override
-    public Client getById(Long id) {
+    public Address getById(Long id) {
         return null;
     }
 
     @Override
-    public Client update(Client item) {
+    public Address update(Address item) {
         return null;
     }
 
     @Override
-    public List<Client> getAll() {
+    public List<Address> getAll() {
         return List.of();
     }
 }

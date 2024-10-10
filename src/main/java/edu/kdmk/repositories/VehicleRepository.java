@@ -1,21 +1,21 @@
 package edu.kdmk.repositories;
 
-import edu.kdmk.model.Client;
+import edu.kdmk.model.vehicle.Vehicle;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @RequiredArgsConstructor
 @Repository
-public class ClientRepository implements EntityRepository<Client> {
+public class VehicleRepository implements EntityRepository<Vehicle> {
+
 
     private final EntityManager entityManager;
 
     @Override
-    public Client add(Client item) {
+    public Vehicle add(Vehicle item) {
         try{
             entityManager.getTransaction().begin();
 
@@ -30,22 +30,22 @@ public class ClientRepository implements EntityRepository<Client> {
     }
 
     @Override
-    public boolean remove(Client item) {
-        return false;
+    public boolean remove(Vehicle item) {
+        return entityManager != null;
     }
 
     @Override
-    public Client getById(Long id) {
+    public Vehicle getById(Long id) {
         return null;
     }
 
     @Override
-    public Client update(Client item) {
+    public Vehicle update(Vehicle item) {
         return null;
     }
 
     @Override
-    public List<Client> getAll() {
+    public List<Vehicle> getAll() {
         return List.of();
     }
 }

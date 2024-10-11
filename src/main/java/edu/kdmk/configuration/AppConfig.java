@@ -11,12 +11,19 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 //@ComponentScan({"edu.kdmk.repositories", "edu.kdmk.services"})
-public class AppConfig {
+public class AppConfig implements AutoCloseable {
 
-    private final EntityManagerFactory emf = Persistence.createEntityManagerFactory("my-persistence-unit");
+    private final EntityManagerFactory entityManagerFactory =  Persistence.createEntityManagerFactory("my-persistence-unit");
 
     @Bean
     public EntityManager entityManager() {
-        return emf.createEntityManager();
+        return entityManagerFactory.createEntityManager();
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
+            entityManagerFactory.close();
+        }
     }
 }

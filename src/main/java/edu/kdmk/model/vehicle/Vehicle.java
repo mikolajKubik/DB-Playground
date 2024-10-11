@@ -19,7 +19,7 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Vehicle {
 
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Exclude //wystarczy porownywac po id
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;

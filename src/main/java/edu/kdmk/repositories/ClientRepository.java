@@ -3,13 +3,10 @@ package edu.kdmk.repositories;
 import edu.kdmk.model.Client;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @RequiredArgsConstructor
-@Repository
 public class ClientRepository implements EntityRepository<Client> {
 
     private final EntityManager entityManager;

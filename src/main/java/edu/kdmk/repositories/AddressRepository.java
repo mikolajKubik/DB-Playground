@@ -3,13 +3,10 @@ package edu.kdmk.repositories;
 import edu.kdmk.model.Address;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @RequiredArgsConstructor
-@Repository
 public class AddressRepository implements EntityRepository<Address> {
 
     private final EntityManager entityManager;

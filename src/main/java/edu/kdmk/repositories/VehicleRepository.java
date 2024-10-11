@@ -3,12 +3,10 @@ package edu.kdmk.repositories;
 import edu.kdmk.model.vehicle.Vehicle;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @RequiredArgsConstructor
-@Repository
 public class VehicleRepository implements EntityRepository<Vehicle> {
 
 

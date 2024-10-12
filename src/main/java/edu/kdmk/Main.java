@@ -2,11 +2,8 @@ package edu.kdmk;
 
 import edu.kdmk.model.Address;
 import edu.kdmk.model.Client;
-import edu.kdmk.model.Rent;
-import edu.kdmk.model.vehicle.Motorcycle;
 import edu.kdmk.repositories.AddressRepository;
 import edu.kdmk.repositories.ClientRepository;
-import edu.kdmk.repositories.VehicleRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;

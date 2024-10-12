@@ -1,8 +1,11 @@
 package edu.kdmk.repositories;
 
+
 import java.util.List;
 
+
 public interface EntityRepository<T> {
+
     T add(T item);
 
     boolean remove(T item);
@@ -12,4 +15,5 @@ public interface EntityRepository<T> {
     T update(T item);
 
     List<T> getAll();
+
 }

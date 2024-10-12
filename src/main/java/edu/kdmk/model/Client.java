@@ -1,6 +1,7 @@
 package edu.kdmk.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.List;
@@ -11,20 +12,22 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Entity
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Client {
 
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @NotNull
     private String name;
+
+    @NotNull
     private String phoneNumber;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "address_id")
-    private Address address;
-
+    @NotNull
+    private String address;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "client")

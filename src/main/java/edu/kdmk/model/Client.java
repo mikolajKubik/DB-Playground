@@ -1,7 +1,6 @@
 package edu.kdmk.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.List;
@@ -11,8 +10,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
+@Entity
 public class Client {
 
     @EqualsAndHashCode.Include
@@ -20,13 +20,16 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotNull
+    @Version
+    private long version;
+
+    @Basic(optional = false)
     private String name;
 
-    @NotNull
+    @Basic(optional = false)
     private String phoneNumber;
 
-    @NotNull
+    @Basic(optional = false)
     private String address;
 
     @ToString.Exclude

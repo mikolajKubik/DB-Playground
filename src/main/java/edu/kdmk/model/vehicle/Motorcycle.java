@@ -1,7 +1,7 @@
 package edu.kdmk.model.vehicle;
 
+import jakarta.persistence.Basic;
 import jakarta.persistence.Entity;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -12,12 +12,12 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @ToString(callSuper = true)
-
 @Entity
 public class Motorcycle extends Vehicle {
 
-    @NotNull
+    @Basic(optional = false)
     private int cylinderCapacity;
-    @NotNull
+
+    @Basic(optional = false)
     private int power;
 }

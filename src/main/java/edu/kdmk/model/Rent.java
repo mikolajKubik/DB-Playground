@@ -2,15 +2,17 @@ package edu.kdmk.model;
 
 import edu.kdmk.model.vehicle.Vehicle;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
+
+import java.sql.Date;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 @Entity
 public class Rent {
 
@@ -19,8 +21,17 @@ public class Rent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Version
+    private long version;
+
     //zmienic
-    private int days;
+    @Basic(optional = false)
+    private Date startDate;
+
+    @Basic(optional = false)
+    private Date endDate;
+
+    @Basic(optional = false)
     private int price;
 
     @ManyToOne

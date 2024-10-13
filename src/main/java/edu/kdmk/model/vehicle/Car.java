@@ -1,7 +1,7 @@
 package edu.kdmk.model.vehicle;
 
+import jakarta.persistence.Basic;
 import jakarta.persistence.Entity;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -14,8 +14,10 @@ import lombok.experimental.SuperBuilder;
 @ToString(callSuper = true)
 @Entity
 public class Car extends Vehicle {
-    @NotNull
+
+    @Basic(optional = false)
     private int numberOfDoors;
-    @NotNull
+
+    @Basic(optional = false)
     private int numberOfSeats;
 }

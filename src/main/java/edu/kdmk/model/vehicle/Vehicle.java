@@ -2,7 +2,6 @@ package edu.kdmk.model.vehicle;
 
 import edu.kdmk.model.Rent;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -25,19 +24,22 @@ public abstract class Vehicle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotNull
+    @Version
+    private long version;
+
+    @Basic(optional = false)
     private String licensePlate;
 
-    @NotNull
+    @Basic(optional = false)
     private String brand;
 
-    @NotNull
+    @Basic(optional = false)
     private String model;
 
-    @NotNull
+    @Basic(optional = false)
     private int year;
 
-    @NotNull
+    @Basic(optional = false)
     private int price;
 
     @ToString.Exclude

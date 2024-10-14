@@ -75,7 +75,7 @@ public class ClientRepository implements EntityRepository<Client> {
     public Client update(Client item) {
 
         EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
-        try  {
+        try {
             em.getTransaction().begin();
 
             Client existingClient = em.find(Client.class, item.getId(), LockModeType.OPTIMISTIC);
@@ -106,9 +106,9 @@ public class ClientRepository implements EntityRepository<Client> {
 
         } catch (Exception e) {
             em.getTransaction().rollback();
+            throw e;
         } finally {
             em.close();
         }
-        return List.of();
     }
 }

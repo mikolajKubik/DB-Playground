@@ -64,10 +64,10 @@ public class VehicleRepository implements EntityRepository<Vehicle> {
 
         } catch (Exception e) {
             em.getTransaction().rollback();
+            throw e;
         } finally {
             em.close();
         }
-        return null;
     }
 
     @Override
@@ -100,15 +100,14 @@ public class VehicleRepository implements EntityRepository<Vehicle> {
 
         try {
 
-            return em.createQuery("SELECT c FROM Client c", Vehicle.class).getResultList();
+            return em.createQuery("SELECT v FROM Vehicle v", Vehicle.class).getResultList();
 
         } catch (Exception e) {
             em.getTransaction().rollback();
+            throw e;
         }
         finally {
             em.close();
         }
-
-        return List.of();
     }
 }

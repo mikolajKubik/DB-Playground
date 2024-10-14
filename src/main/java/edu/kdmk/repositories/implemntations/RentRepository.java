@@ -96,12 +96,10 @@ public class RentRepository implements EntityRepository<Rent> {
 
         try {
 
-            return em.find(Rent.class, id, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+            return em.find(Rent.class, id);
 
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
+            em.getTransaction().rollback();
             throw e;
         }
         finally {
@@ -199,9 +197,7 @@ public class RentRepository implements EntityRepository<Rent> {
             return em.createQuery("SELECT c FROM Rent c", Rent.class).getResultList();
 
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
+            em.getTransaction().rollback();
             throw e;
         } finally {
             em.close();

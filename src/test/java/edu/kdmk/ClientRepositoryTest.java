@@ -30,8 +30,38 @@ public class ClientRepositoryTest {
                 .address("123 Main St")
                 .build();
     }
+
     @Test
-    public void testAddClient() {
+    public void addClientTest() {
+        ClientRepository clientRepository = new ClientRepository();
+        clientRepository.add(client1);
+        Client client = clientRepository.getById(client1.getId());
+        assertEquals(client, client1);
+    }
+
+    @Test
+    public void updateClientTest() {
+        ClientRepository clientRepository = new ClientRepository();
+        clientRepository.add(client1);
+        client1.setName("Adam B");
+        clientRepository.update(client1);
+        Client client2 = clientRepository.getById(client1.getId());
+        assertEquals(client2.getName(), "Adam B");
+    }
+
+    @Test
+    public void removeClientTest() {
+        ClientRepository clientRepository = new ClientRepository();
+        clientRepository.add(client1);
+        var result = clientRepository.remove(client1);
+        assertTrue(result);
+
+        Client client = clientRepository.getById(client1.getId());
+        assertNull(client);
+    }
+
+    @Test
+    public void getByIdTest() {
         ClientRepository clientRepository = new ClientRepository();
         clientRepository.add(client1);
         Client client = clientRepository.getById(client1.getId());

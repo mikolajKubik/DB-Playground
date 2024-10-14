@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -44,5 +45,9 @@ public abstract class Vehicle {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "vehicle")
-    private List<Rent> rents;
+    private List<Rent> rents = new ArrayList<>();
+
+
+
+
 }

@@ -3,6 +3,7 @@ package edu.kdmk.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -34,5 +35,9 @@ public class Client {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "client")
-    private List<Rent> rents;
+    private List<Rent> rents = new ArrayList<>();
+
+    public void addRent(Rent rent) {
+
+    }
 }

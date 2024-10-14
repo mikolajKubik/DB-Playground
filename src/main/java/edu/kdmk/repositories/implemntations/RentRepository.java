@@ -1,6 +1,10 @@
 package edu.kdmk.repositories.implemntations;
 
+import edu.kdmk.model.Client;
 import edu.kdmk.model.Rent;
+import edu.kdmk.model.vehicle.Vehicle;
+import edu.kdmk.repositories.EntityRepository;
+import edu.kdmk.repositories.JPAUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.LockModeType;
@@ -23,18 +27,20 @@ public class RentRepository implements EntityRepository<Rent> {
             Vehicle vehicle = em.find(Vehicle.class, item.getVehicle().getId(), LockModeType.OPTIMISTIC_FORCE_INCREMENT);
             Client client = em.find(Client.class, item.getClient().getId(), LockModeType.OPTIMISTIC_FORCE_INCREMENT);
 
-            em.persist(item);
-            em.getTransaction().commit();
-            return item;
 
-            /*if (vehicle.getRents().isEmpty() && client.getRents().isEmpty()) {
+            if (vehicle.getRents().isEmpty() && client.getRents().size() <= 5) {
+                vehicle.getRents().add(item);
+                client.getRents().add(item);
+
+                em.merge(vehicle);
+                em.merge(client);
                 em.persist(item);
                 em.getTransaction().commit();
                 return item;
             } else {
                 em.getTransaction().rollback();
-                return null;
-            }*/
+                throw new IllegalArgumentException("Vehicle has too many rents or client has too many rents");
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -46,20 +52,42 @@ public class RentRepository implements EntityRepository<Rent> {
     public boolean remove(Rent item) {
         try (EntityManager em = entityManagerFactory.createEntityManager()){
             em.getTransaction().begin();
-            Rent rentToRemove = em.find(Rent.class, item.getId(),
-                    LockModeType.OPTIMISTIC_FORCE_INCREMENT);
-            if (rentToRemove != null) {
-                em.remove(rentToRemove);
+
+            // Find the Rent entity by ID
+            Rent rent = em.find(Rent.class, item.getId(), LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+            if (rent == null) {
+                em.getTransaction().rollback();
+                return false;  // Rent not found
+            }
+
+            // Get the associated Vehicle and Client
+            Vehicle vehicle = em.find(Vehicle.class, rent.getVehicle().getId(), LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+            Client client = em.find(Client.class, rent.getClient().getId(), LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+
+            // Remove the rent from vehicle and client relationships
+            if (vehicle != null && client != null) {
+                vehicle.getRents().remove(rent);
+                client.getRents().remove(rent);
+
+                // Merge changes to vehicle and client
+                em.merge(vehicle);
+                em.merge(client);
+
+                // Now remove the rent entity itself
+                em.remove(rent);
+
+                // Commit the transaction
                 em.getTransaction().commit();
                 return true;
             } else {
                 em.getTransaction().rollback();
-                return false;
+                return false;  // Either vehicle or client was not found
             }
         } catch (Exception e) {
-
-            e.printStackTrace();
-            return false;
+            em.getTransaction().rollback();
+            throw e;  // Re-throw the exception to be handled elsewhere
+        } finally {
+            em.close();
         }
     }
 
@@ -69,19 +97,18 @@ public class RentRepository implements EntityRepository<Rent> {
 
         try {
 
-            return em.find(Rent.class, id);
+            return em.find(Rent.class, id, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
 
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            e.printStackTrace();
+            throw e;
         }
         finally {
             em.close();
         }
 
-        return null;
     }
 
     @Override

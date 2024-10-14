@@ -45,9 +45,10 @@ public class VehicleRepository implements EntityRepository<Vehicle> {
                 return false;
             }
         } catch (Exception e) {
-
-            e.printStackTrace();
-            return false;
+            em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
         }
     }
 

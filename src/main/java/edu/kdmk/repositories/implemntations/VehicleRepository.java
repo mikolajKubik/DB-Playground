@@ -2,37 +2,39 @@ package edu.kdmk.repositories.implemntations;
 
 import edu.kdmk.model.vehicle.Vehicle;
 import edu.kdmk.repositories.EntityRepository;
+import edu.kdmk.repositories.JPAUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.LockModeType;
-import lombok.RequiredArgsConstructor;
+
 
 import java.util.List;
 
-@RequiredArgsConstructor
+
 public class VehicleRepository implements EntityRepository<Vehicle> {
-
-
-    private final EntityManagerFactory entityManagerFactory;
 
     @Override
     public Vehicle add(Vehicle item) {
-
-        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
+        try {
             em.getTransaction().begin();
 
             em.persist(item);
 
             em.getTransaction().commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
         }
         return item;
     }
 
     @Override
     public boolean remove(Vehicle item) {
-        try (EntityManager em = entityManagerFactory.createEntityManager()){
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
+        try {
             em.getTransaction().begin();
             Vehicle vehicleToRemove = em.find(Vehicle.class, item.getId(),
                     LockModeType.OPTIMISTIC_FORCE_INCREMENT);
@@ -54,29 +56,24 @@ public class VehicleRepository implements EntityRepository<Vehicle> {
 
     @Override
     public Vehicle getById(Long id) {
-        EntityManager em = entityManagerFactory.createEntityManager();
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
 
         try {
 
             return em.find(Vehicle.class, id);
 
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            e.printStackTrace();
-        }
-        finally {
+            em.getTransaction().rollback();
+        } finally {
             em.close();
         }
-
         return null;
     }
 
     @Override
     public Vehicle update(Vehicle item) {
-
-        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
+        try {
             em.getTransaction().begin();
 
             Vehicle existingVehicle = em.find(Vehicle.class, item.getId(), LockModeType.OPTIMISTIC);
@@ -89,25 +86,24 @@ public class VehicleRepository implements EntityRepository<Vehicle> {
                 return null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
         }
 
     }
 
     @Override
     public List<Vehicle> getAll() {
-        EntityManager em = entityManagerFactory.createEntityManager();
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
 
         try {
 
             return em.createQuery("SELECT c FROM Client c", Vehicle.class).getResultList();
 
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            e.printStackTrace();
+            em.getTransaction().rollback();
         }
         finally {
             em.close();

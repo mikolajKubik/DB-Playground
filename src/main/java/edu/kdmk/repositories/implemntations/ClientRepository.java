@@ -2,6 +2,7 @@ package edu.kdmk.repositories.implemntations;
 
 import edu.kdmk.model.Client;
 import edu.kdmk.repositories.EntityRepository;
+import edu.kdmk.repositories.JPAUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.LockModeType;
@@ -9,31 +10,31 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-@RequiredArgsConstructor
 public class ClientRepository implements EntityRepository<Client> {
 
-    private final EntityManagerFactory entityManagerFactory;
 
     @Override
     public Client add(Client item) {
-
-
-        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
+        try {
             em.getTransaction().begin();
 
             em.persist(item);
 
             em.getTransaction().commit();
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
         }
         return item;
     }
 
     @Override
     public boolean remove(Client item) {
-        try (EntityManager em = entityManagerFactory.createEntityManager()){
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
+        try {
             em.getTransaction().begin();
             Client clientToRemove = em.find(Client.class, item.getId(),
                     LockModeType.OPTIMISTIC_FORCE_INCREMENT);
@@ -46,37 +47,35 @@ public class ClientRepository implements EntityRepository<Client> {
                 return false;
             }
         } catch (Exception e) {
-
-            e.printStackTrace();
-            return false;
+            em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
         }
     }
 
     @Override
     public Client getById(Long id) {
-        EntityManager em = entityManagerFactory.createEntityManager();
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
 
         try {
 
             return em.find(Client.class, id);
 
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            e.printStackTrace();
+            em.getTransaction().rollback();
+            throw e;
         }
         finally {
             em.close();
         }
-
-        return null;
     }
 
     @Override
     public Client update(Client item) {
 
-        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
+        try  {
             em.getTransaction().begin();
 
             Client existingClient = em.find(Client.class, item.getId(), LockModeType.OPTIMISTIC);
@@ -89,30 +88,27 @@ public class ClientRepository implements EntityRepository<Client> {
                 return null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
         }
 
     }
 
     @Override
     public List<Client> getAll() {
-        EntityManager em = entityManagerFactory.createEntityManager();
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
 
         try {
 
             return em.createQuery("SELECT c FROM Client c", Client.class).getResultList();
 
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            e.printStackTrace();
-        }
-        finally {
+            em.getTransaction().rollback();
+        } finally {
             em.close();
         }
-
         return List.of();
     }
 }

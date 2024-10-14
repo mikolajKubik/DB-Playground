@@ -12,16 +12,12 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-@RequiredArgsConstructor
 public class RentRepository implements EntityRepository<Rent> {
-
-    private final EntityManagerFactory entityManagerFactory;
 
     @Override
     public Rent add(Rent item) {
-
-
-        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
+        try {
             em.getTransaction().begin();
 
             Vehicle vehicle = em.find(Vehicle.class, item.getVehicle().getId(), LockModeType.OPTIMISTIC_FORCE_INCREMENT);
@@ -43,14 +39,17 @@ public class RentRepository implements EntityRepository<Rent> {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            em.getTransaction().rollback();
+            throw e;
+        } finally {
+            em.close();
         }
     }
 
     @Override
     public boolean remove(Rent item) {
-        try (EntityManager em = entityManagerFactory.createEntityManager()){
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
+        try {
             em.getTransaction().begin();
 
             // Find the Rent entity by ID
@@ -93,7 +92,7 @@ public class RentRepository implements EntityRepository<Rent> {
 
     @Override
     public Rent getById(Long id) {
-        EntityManager em = entityManagerFactory.createEntityManager();
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
 
         try {
 
@@ -113,29 +112,87 @@ public class RentRepository implements EntityRepository<Rent> {
 
     @Override
     public Rent update(Rent item) {
-
-        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
+        try {
             em.getTransaction().begin();
 
-            Rent existingRent = em.find(Rent.class, item.getId(), LockModeType.OPTIMISTIC);
-            if (existingRent != null) {
-                em.merge(item);
-                em.getTransaction().commit();
-                return item;
-            } else {
+            // Find the existing Rent entity in the database
+            Rent existingRent = em.find(Rent.class, item.getId(), LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+            if (existingRent == null) {
                 em.getTransaction().rollback();
-                return null;
+                throw new IllegalArgumentException("Rent with ID " + item.getId() + " not found.");
             }
+
+            // Get the current associated Vehicle and Client from the existing Rent
+            Vehicle oldVehicle = existingRent.getVehicle();
+            Client oldClient = existingRent.getClient();
+
+            // Get the new Vehicle and Client from the updated Rent
+            Vehicle newVehicle = em.find(Vehicle.class, item.getVehicle().getId(), LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+            Client newClient = em.find(Client.class, item.getClient().getId(), LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+
+            if (newVehicle == null || newClient == null) {
+                em.getTransaction().rollback();
+                throw new IllegalArgumentException("New vehicle or client not found.");
+            }
+
+            // Check if Vehicle or Client has changed
+            boolean vehicleChanged = !oldVehicle.equals(newVehicle);
+            boolean clientChanged = !oldClient.equals(newClient);
+
+            // If Vehicle has changed, update the associations
+            if (vehicleChanged) {
+                // Remove the rent from the old vehicle's rent list
+                oldVehicle.getRents().remove(existingRent);
+                em.merge(oldVehicle);
+
+                // Ensure the new vehicle can accept the rent
+                if (newVehicle.getRents().size() > 1) {
+                    em.getTransaction().rollback();
+                    throw new IllegalArgumentException("New vehicle has too many rents.");
+                }
+
+                // Add the rent to the new vehicle's rent list
+                newVehicle.getRents().add(item);
+                em.merge(newVehicle);
+            }
+
+            // If Client has changed, update the associations
+            if (clientChanged) {
+                // Remove the rent from the old client's rent list
+                oldClient.getRents().remove(existingRent);
+                em.merge(oldClient);
+
+                // Ensure the new client can accept the rent
+                if (newClient.getRents().size() > 5) {
+                    em.getTransaction().rollback();
+                    throw new IllegalArgumentException("New client has too many rents.");
+                }
+
+                // Add the rent to the new client's rent list
+                newClient.getRents().add(item);
+                em.merge(newClient);
+            }
+
+            // Merge the updated Rent entity (including updated vehicle and client)
+            Rent updatedRent = em.merge(item);
+
+            // Commit the transaction
+            em.getTransaction().commit();
+
+            return updatedRent;
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            em.getTransaction().rollback();
+            throw e;  // Re-throw the exception to be handled by the caller
+        } finally {
+            em.close();
         }
 
     }
 
     @Override
     public List<Rent> getAll() {
-        EntityManager em = entityManagerFactory.createEntityManager();
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
 
         try {
 
@@ -145,14 +202,9 @@ public class RentRepository implements EntityRepository<Rent> {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            e.printStackTrace();
-        }
-        finally {
+            throw e;
+        } finally {
             em.close();
         }
-
-        return List.of();
     }
-
-
 }

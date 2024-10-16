@@ -49,8 +49,7 @@ public class ClientManager {
         var em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
-            Client clientToUpdate = clientRepository.getById(client.getId(), em);
-            clientRepository.update(clientToUpdate, em);
+            clientRepository.update(client, em);
             em.getTransaction().commit();
         } catch (Exception e) {
             em.getTransaction().rollback();
@@ -62,7 +61,10 @@ public class ClientManager {
     public Client getClientById(Long id) {
         var em = emf.createEntityManager();
         try {
-            return clientRepository.getById(id, em);
+            em.getTransaction().begin();
+            Client client =  clientRepository.getById(id, em);
+            em.getTransaction().commit();
+            return client;
         } catch (Exception e) {
             em.getTransaction().rollback();
             throw e;

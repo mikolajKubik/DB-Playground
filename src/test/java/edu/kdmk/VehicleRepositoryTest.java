@@ -1,12 +1,18 @@
-/*
 package edu.kdmk;
 
+import edu.kdmk.managers.ClientManager;
+import edu.kdmk.managers.VehicleManager;
+import edu.kdmk.model.Client;
 import edu.kdmk.model.vehicle.Car;
 import edu.kdmk.model.vehicle.Motorcycle;
 import edu.kdmk.model.vehicle.Vehicle;
-import edu.kdmk.repositories.JPAUtil;
+import edu.kdmk.repositories.EntityRepository;
+import edu.kdmk.repositories.implemntations.ClientRepository;
 import edu.kdmk.repositories.implemntations.VehicleRepository;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +20,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class VehicleRepositoryTest {
+
+    EntityRepository<Vehicle> vehicleRepository;
+    VehicleManager vehicleManager;
+    EntityManagerFactory emf;
 
     Vehicle vehicle1;
     Vehicle vehicle2;
@@ -39,49 +49,50 @@ public class VehicleRepositoryTest {
                 .cylinderCapacity(1000)
                 .power(125)
                 .build();
+
+        emf = Persistence.createEntityManagerFactory("my-persistence-unit");
+        vehicleRepository = new VehicleRepository();
+        vehicleManager = new VehicleManager(emf, vehicleRepository);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        emf.close();
     }
 
     @Test
     public void addVehicleTest() {
-        VehicleRepository vehicleRepository = new VehicleRepository();
-        vehicleRepository.add(vehicle1);
-        vehicleRepository.add(vehicle2);
-        Vehicle vehicleFromDb1 = vehicleRepository.getById(vehicle1.getId());
-        Vehicle vehicleFromDb2 = vehicleRepository.getById(vehicle2.getId());
-
-        assertEquals(vehicleFromDb1, vehicle1);
-        assertEquals(vehicleFromDb2, vehicle2);
-
+        vehicleManager.addVehicle(vehicle1);
+        vehicleManager.addVehicle(vehicle2);
+        assertEquals(vehicle1, vehicleManager.getVehicleById(vehicle1.getId()));
+        assertEquals(vehicle2, vehicleManager.getVehicleById(vehicle2.getId()));
     }
 
     @Test
     public void removeVehicleTest() {
-        VehicleRepository vehicleRepository = new VehicleRepository();
-        vehicleRepository.add(vehicle1);
-        vehicleRepository.add(vehicle2);
-        assertTrue(vehicleRepository.remove(vehicle1));
-        assertTrue(vehicleRepository.remove(vehicle2));
-        assertNull(vehicleRepository.getById(vehicle1.getId()));
-        assertNull(vehicleRepository.getById(vehicle2.getId()));
+        vehicleManager.addVehicle(vehicle1);
+        vehicleManager.addVehicle(vehicle2);
+        assertTrue(vehicleManager.removeVehicle(vehicle1));
+        assertTrue(vehicleManager.removeVehicle(vehicle2));
+        assertNull(vehicleManager.getVehicleById(vehicle1.getId()));
+        assertNull(vehicleManager.getVehicleById(vehicle2.getId()));
     }
 
     @Test
     public void updateVehicleTest() {
-        VehicleRepository vehicleRepository = new VehicleRepository();
-        vehicleRepository.add(vehicle1);
+        vehicleManager.addVehicle(vehicle1);
         vehicle1.setBrand("Ford");
-        vehicleRepository.update(vehicle1);
-        Vehicle vehicle = vehicleRepository.getById(vehicle1.getId());
+        vehicleManager.updateVehicle(vehicle1);
+        Vehicle vehicle = vehicleManager.getVehicleById(vehicle1.getId());
         assertEquals(vehicle.getBrand(), "Ford");
     }
 
     @Test
     public void getByIdTest() {
-        VehicleRepository vehicleRepository = new VehicleRepository();
-        vehicleRepository.add(vehicle1);
-        Vehicle vehicle = vehicleRepository.getById(vehicle1.getId());
+        vehicleManager.addVehicle(vehicle1);
+        Vehicle vehicle = vehicleManager.getVehicleById(vehicle1.getId());
         assertEquals(vehicle, vehicle1);
     }
 
 }
-*/
+

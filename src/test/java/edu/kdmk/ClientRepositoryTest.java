@@ -48,7 +48,7 @@ public class ClientRepositoryTest {
     public void updateClientTest() {
         clientManager.addClient(client1);
         client1.setName("Adam B");
-        clientManager.updateClient(client1);
+        System.out.println(clientManager.updateClient(client1).getName());
         Client client2 = clientManager.getClientById(client1.getId());
         assertEquals(client2.getName(), "Adam B");
     }

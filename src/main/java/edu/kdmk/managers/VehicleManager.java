@@ -50,8 +50,7 @@ public class VehicleManager {
         var em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
-            Vehicle vehicleToUpdate = vehicleRepository.getById(vehicle.getId(), em);
-            vehicleRepository.update(vehicleToUpdate, em);
+            vehicleRepository.update(vehicle, em);
             em.getTransaction().commit();
         } catch (Exception e) {
             em.getTransaction().rollback();
@@ -60,10 +59,13 @@ public class VehicleManager {
         return vehicle;
     }
 
-    public void getVehicleById(Long id) {
+    public Vehicle getVehicleById(Long id) {
         var em = emf.createEntityManager();
         try {
-            vehicleRepository.getById(id, em);
+            em.getTransaction().begin();
+            Vehicle vehicle = vehicleRepository.getById(id, em);
+            em.getTransaction().commit();
+            return vehicle;
         } catch (Exception e) {
             throw e;
         }

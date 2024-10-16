@@ -38,13 +38,7 @@ public class RentRepository implements EntityRepository<Rent> {
     @Override
     public Rent update(Rent item, EntityManager em) {
         try {
-            Rent existingRent = em.find(Rent.class, item.getId(), LockModeType.OPTIMISTIC);
-            if (existingRent != null) {
-                em.merge(item);
-                return item;
-            } else {
-                return null;
-            }
+            return em.merge(item);
         } catch (Exception e) {
             throw e;
         }

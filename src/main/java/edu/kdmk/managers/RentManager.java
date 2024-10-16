@@ -91,33 +91,6 @@ public class RentManager {
                 throw new IllegalArgumentException("Rent with ID " + rent.getId() + " not found.");
             }
 
-            // Get the current associated Vehicle and Client from the existing Rent
-            Vehicle oldVehicle = existingRent.getVehicle();
-            Client oldClient = existingRent.getClient();
-
-            // Get the new Vehicle and Client from the updated Rent
-            Vehicle newVehicle = vehicleRepository.getById(rent.getVehicle().getId(), em);
-            Client newClient = clientRepository.getById(rent.getClient().getId(), em);
-
-            if (newVehicle == null || newClient == null) {
-                em.getTransaction().rollback();
-                throw new IllegalArgumentException("New vehicle or client not found.");
-            }
-
-            // Check if Vehicle or Client has changed
-            boolean vehicleChanged = !oldVehicle.equals(newVehicle);
-            boolean clientChanged = !oldClient.equals(newClient);
-
-            // Update associations if necessary
-            if (vehicleChanged) {
-                oldVehicle.getRents().remove(existingRent);
-                newVehicle.getRents().add(existingRent);
-            }
-            if (clientChanged) {
-                oldClient.getRents().remove(existingRent);
-                newClient.getRents().add(existingRent);
-            }
-
             // Update the rent
             rentRepository.update(rent, em);
 
@@ -135,7 +108,10 @@ public class RentManager {
     public Rent getRentById(Long id) {
         var em = emf.createEntityManager();
         try {
-            return rentRepository.getById(id, em);
+            em.getTransaction().begin();
+            Rent rent = rentRepository.getById(id, em);
+            em.getTransaction().commit();
+            return rent;
         } catch (Exception e) {
             throw e;
         }

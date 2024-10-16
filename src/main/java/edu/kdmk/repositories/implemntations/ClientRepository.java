@@ -17,19 +17,14 @@ public class ClientRepository implements EntityRepository<Client> {
         } catch (Exception e) {
             throw e;
         }
-        return item;
+        return em.find(Client.class, item.getId());
     }
 
     @Override
     public boolean remove(Client item, EntityManager em) {
         try {
-            if (item != null) {
-                em.remove(item);
-                return true;
-            } else {
-                em.getTransaction().rollback();
-                return false;
-            }
+            em.remove(item);
+            return true;
         } catch (Exception e) {
             throw e;
         }

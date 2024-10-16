@@ -1,18 +1,20 @@
-/*
+
 package edu.kdmk;
 
+import edu.kdmk.managers.ClientManager;
+import edu.kdmk.managers.RentManager;
+import edu.kdmk.managers.VehicleManager;
 import edu.kdmk.model.Client;
 import edu.kdmk.model.Rent;
 import edu.kdmk.model.vehicle.Car;
 import edu.kdmk.model.vehicle.Vehicle;
-import edu.kdmk.repositories.JPAUtil;
+import edu.kdmk.repositories.EntityRepository;
 import edu.kdmk.repositories.implemntations.ClientRepository;
 import edu.kdmk.repositories.implemntations.RentRepository;
 import edu.kdmk.repositories.implemntations.VehicleRepository;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.Persistence;
-import jakarta.persistence.RollbackException;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,10 +33,18 @@ public class RentRepositoryTest {
     Vehicle vehicle1;
     Vehicle vehicle2;
 
+    EntityManagerFactory emf;
+    EntityRepository<Client> cRepo;
+    EntityRepository<Vehicle> vRepo;
+    EntityRepository<Rent> rRepo;
+
+    ClientManager cManager;
+    VehicleManager vManager;
+    RentManager rManager;
+
 
     @BeforeEach
-    public void beforeEach() {
-
+    public void setUp() {
         client1 = Client.builder()
                 .name("Adam A")
                 .phoneNumber("123-456-789")
@@ -66,22 +76,27 @@ public class RentRepositoryTest {
                 .numberOfDoors(5)
                 .numberOfSeats(5)
                 .build();
+
+        emf = Persistence.createEntityManagerFactory("my-persistence-unit");
+        cRepo = new ClientRepository();
+        vRepo = new VehicleRepository();
+        rRepo = new RentRepository();
+        cManager = new ClientManager(emf, cRepo);
+        vManager = new VehicleManager(emf, vRepo);
+        rManager = new RentManager(emf, rRepo, vRepo, cRepo);
+
     }
 
-    @Test
-    public void testAdd() {
-        // given
-        // when
-        // then
+    @AfterEach
+    public void tearDown() {
+        emf.close();
     }
 
     @Test
     public void addRentTest() {
-        var cRepo = new ClientRepository();
-        var vRepo = new VehicleRepository();
 
-        cRepo.add(client1);
-        vRepo.add(vehicle1);
+        cManager.addClient(client1);
+        vManager.addVehicle(vehicle1);
 
         var rent = Rent.builder()
                 .client(client1)
@@ -90,22 +105,17 @@ public class RentRepositoryTest {
                 .endDate(Date.valueOf(LocalDate.now().plusDays(5)))
                 .build();
 
-        var rRepo = new RentRepository();
-        rRepo.add(rent);
+        rManager.addRent(rent);
 
 
-        Rent rentFromDb = rRepo.getById(rent.getId());
-
+        Rent rentFromDb = rManager.getRentById(rent.getId());
         assertEquals(rent, rentFromDb);
     }
 
     @Test
     public void removeRentTest() {
-        var cRepo = new ClientRepository();
-        var vRepo = new VehicleRepository();
-
-        cRepo.add(client1);
-        vRepo.add(vehicle1);
+        cManager.addClient(client1);
+        vManager.addVehicle(vehicle1);
 
         var rent = Rent.builder()
                 .client(client1)
@@ -114,18 +124,14 @@ public class RentRepositoryTest {
                 .endDate(Date.valueOf(LocalDate.now().plusDays(5)))
                 .build();
 
-        var rRepo = new RentRepository();
-        rRepo.add(rent);
-        assertTrue(rRepo.remove(rent));
+        rManager.addRent(rent);
+        assertTrue(rManager.removeRent(rent));
     }
 
     @Test
     public void getRentByIdTest() {
-        var cRepo = new ClientRepository();
-        var vRepo = new VehicleRepository();
-
-        cRepo.add(client1);
-        vRepo.add(vehicle1);
+        cManager.addClient(client1);
+        vManager.addVehicle(vehicle1);
 
         var rent = Rent.builder()
                 .client(client1)
@@ -134,18 +140,16 @@ public class RentRepositoryTest {
                 .endDate(Date.valueOf(LocalDate.now().plusDays(5)))
                 .build();
 
-        var rRepo = new RentRepository();
-        rRepo.add(rent);
-        assertEquals(rRepo.getById(rent.getId()), rent);
+        rManager.addRent(rent);
+        assertEquals(rManager.getRentById(rent.getId()), rent);
     }
 
     @Test
-    public void updateRentTest() {
-        var cRepo = new ClientRepository();
-        var vRepo = new VehicleRepository();
-
-        cRepo.add(client1);
-        vRepo.add(vehicle1);
+    public void updateRentTest() { //  Ale co robi ten test to nie mam pojęcia co nie xD
+        // ale już działa, był problem bo 2 transakcje chciały updateować go po sobie a nie dostawwały z bazy nowej wersji
+        // wieć poprawnie dostawaliście optimnistica locka wyjątekiem na morde okok?
+        cManager.addClient(client1);
+        vManager.addVehicle(vehicle1);
 
         var rent = Rent.builder()
                 .client(client1)
@@ -154,22 +158,30 @@ public class RentRepositoryTest {
                 .endDate(Date.valueOf(LocalDate.now().plusDays(5)))
                 .build();
 
-        var rRepo = new RentRepository();
-        rRepo.add(rent);
+        rManager.addRent(rent);
 
+        assertEquals(rent, rManager.getRentById(rent.getId()));
 
+        var rentFromDb = rManager.getRentById(rent.getId());
+        rentFromDb.setEndDate(Date.valueOf(LocalDate.now().plusDays(10)));
 
-        assertEquals(rent, rRepo.getById(rent.getId()));
+        assertEquals(rManager.updateRent(rentFromDb).getId(), rent.getId());
     }
 
     @Test
     public void optimisticLockTestTwoRentsOneClient() {
-        var cRepo = new ClientRepository();
-        var vRepo = new VehicleRepository();
+//        var cRepo = new ClientRepository();
+//        var vRepo = new VehicleRepository();
+//
+//        cRepo.add(client1);
+//        vRepo.add(vehicle1);
+//        vRepo.add(vehicle2);
+        var cManager = new ClientManager(emf, new ClientRepository());
+        var vManager = new VehicleManager(emf, new VehicleRepository());
 
-        cRepo.add(client1);
-        vRepo.add(vehicle1);
-        vRepo.add(vehicle2);
+        cManager.addClient(client1);
+        vManager.addVehicle(vehicle1);
+        vManager.addVehicle(vehicle2);
 
         var rent1 = Rent.builder()
                 .client(client1)
@@ -198,10 +210,12 @@ public class RentRepositoryTest {
         Runnable rentTask1 = () -> {
             try {
 
-                var rRepo1 = new RentRepository();
+                var rManager1 = new RentManager(emf, new RentRepository(), new VehicleRepository(), new ClientRepository());
+                // var rRepo1 = new RentRepository();
                 latch.await();  // Czekamy na sygnał startu
 
-                rRepo1.add(rent1);
+                //rRepo1.add(rent1);
+                rManager1.addRent(rent1);
                 System.out.println("Rent1 added by thread: " + Thread.currentThread().getName());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -214,9 +228,11 @@ public class RentRepositoryTest {
         Runnable rentTask2 = () -> {
             try {
 //                EntityManagerFactory entityManagerFactory3 = Persistence.createEntityManagerFactory("my-persistence-unit");
-                var rRepo2 = new RentRepository();
+//                var rRepo2 = new RentRepository();
+                var rManager2 = new RentManager(emf, new RentRepository(), new VehicleRepository(), new ClientRepository());
                 latch.await();  // Czekamy na sygnał startu
-                rRepo2.add(rent2);
+//                rRepo2.add(rent2);
+                rManager2.addRent(rent2);
                 System.out.println("Rent2 added by thread: " + Thread.currentThread().getName());
 //                entityManagerFactory3.close();
             } catch (Exception e) {
@@ -249,12 +265,19 @@ public class RentRepositoryTest {
 
     @Test
     public void optimisticLockTestTwoRentsOneVehicle() {
-        var cRepo = new ClientRepository();
-        var vRepo = new VehicleRepository();
+//        var cRepo = new ClientRepository();
+//        var vRepo = new VehicleRepository();
+//
+//        cRepo.add(client1);
+//        cRepo.add(client2);
+//        vRepo.add(vehicle1);
 
-        cRepo.add(client1);
-        cRepo.add(client2);
-        vRepo.add(vehicle1);
+        var cManager = new ClientManager(emf, new ClientRepository());
+        var vManager = new VehicleManager(emf, new VehicleRepository());
+
+        cManager.addClient(client1);
+        cManager.addClient(client2);
+        vManager.addVehicle(vehicle1);
 
         var rent1 = Rent.builder()
                 .client(client1)
@@ -283,10 +306,12 @@ public class RentRepositoryTest {
         Runnable rentTask1 = () -> {
             try {
 
-                var rRepo1 = new RentRepository();
+//                var rRepo1 = new RentRepository();
+                var rManager1 = new RentManager(emf, new RentRepository(), new VehicleRepository(), new ClientRepository());
                 latch.await();  // Czekamy na sygnał startu
 
-                rRepo1.add(rent1);
+//                rRepo1.add(rent1);
+                rManager1.addRent(rent1);
                 System.out.println("Rent1 added by thread: " + Thread.currentThread().getName());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -299,9 +324,11 @@ public class RentRepositoryTest {
         Runnable rentTask2 = () -> {
             try {
 //                EntityManagerFactory entityManagerFactory3 = Persistence.createEntityManagerFactory("my-persistence-unit");
-                var rRepo2 = new RentRepository();
+//                var rRepo2 = new RentRepository();
+                var rManager2 = new RentManager(emf, new RentRepository(), new VehicleRepository(), new ClientRepository());
                 latch.await();  // Czekamy na sygnał startu
-                rRepo2.add(rent2);
+//                rRepo2.add(rent2);
+                rManager2.addRent(rent2);
                 System.out.println("Rent2 added by thread: " + Thread.currentThread().getName());
 //                entityManagerFactory3.close();
             } catch (Exception e) {
@@ -331,17 +358,23 @@ public class RentRepositoryTest {
 
         assertTrue(exceptionCaught[0]);
     }
-
-
-
+//
+//
+//
     @Test
     public void testRentVehicleLimit() {
-        var cRepo = new ClientRepository();
-        var vRepo = new VehicleRepository();
+//        var cRepo = new ClientRepository();
+//        var vRepo = new VehicleRepository();
+//
+//        cRepo.add(client1);
+//        cRepo.add(client2);
+//        vRepo.add(vehicle1);
+        var cManager = new ClientManager(emf, new ClientRepository());
+        var vManager = new VehicleManager(emf, new VehicleRepository());
 
-        cRepo.add(client1);
-        cRepo.add(client2);
-        vRepo.add(vehicle1);
+        cManager.addClient(client1);
+        vManager.addVehicle(vehicle1);
+        vManager.addVehicle(vehicle2);
 
         var rent1 = Rent.builder()
                 .client(client1)
@@ -351,8 +384,10 @@ public class RentRepositoryTest {
                 .build();
 
 
-        var rRepo = new RentRepository();
-        rRepo.add(rent1);
+//        var rRepo = new RentRepository();
+//        rRepo.add(rent1);
+        var rManager = new RentManager(emf, new RentRepository(), new VehicleRepository(), new ClientRepository());
+        rManager.addRent(rent1);
 
         var rent2 = Rent.builder()
                 .client(client2)
@@ -361,29 +396,13 @@ public class RentRepositoryTest {
                 .endDate(Date.valueOf(LocalDate.now().plusDays(5)))
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> rRepo.add(rent2));
-
-    }
-
-
-
-
-
-    @Test
-    public void testRemove() {
-        // given
-        // when
-        // then
-    }
-
-    @Test
-    public void testGetById() {
+        assertThrows(IllegalArgumentException.class, () -> rManager.addRent(rent2));
 
     }
 
 }
 
-*/
+
 /*
 * @Test
     public void optimisticLockTestTwoRentsOneClient() {

@@ -16,9 +16,10 @@ public class ClientManager {
 
     public Client addClient(Client client) {
         var em = emf.createEntityManager();
+        Client result;
         try {
             em.getTransaction().begin();
-            clientRepository.add(client, em);
+            result = clientRepository.add(client, em);
             em.getTransaction().commit();
         } catch (Exception e) {
             em.getTransaction().rollback();
@@ -26,15 +27,15 @@ public class ClientManager {
         } finally {
             em.close();
         }
-        return client;
+        return result;
     }
 
-    public boolean removeClient(Client client) {
+    public boolean removeClient(long id) {
         var em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
-            Client clientToRemove = clientRepository.getById(client.getId(), em);
-            clientRepository.remove(clientToRemove, em);
+            Client client = em.find(Client.class, id);
+            clientRepository.remove(client, em);
             em.getTransaction().commit();
         } catch (Exception e) {
             em.getTransaction().rollback();
@@ -45,7 +46,9 @@ public class ClientManager {
         return true;
     }
 
-    public Client updateClient(Client client) {
+    public Client updateClient(Client client) { // To nie będzie działać z tego powodu, że client będzie detatached
+        // Ponieaż entityManager, który go stowrzył już został usunety
+        // Aha podobo wam działa to ide spać elo pyk pyk pyk nie elo
         var em = emf.createEntityManager();
         try {
             em.getTransaction().begin();

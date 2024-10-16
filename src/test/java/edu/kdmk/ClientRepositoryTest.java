@@ -6,6 +6,7 @@ import edu.kdmk.model.Client;
 import edu.kdmk.repositories.EntityRepository;
 import edu.kdmk.repositories.implemntations.ClientRepository;
 import jakarta.persistence.*;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,8 +56,8 @@ public class ClientRepositoryTest {
 
     @Test
     public void removeClientTest() {
-        clientManager.addClient(client1);
-        clientManager.removeClient(client1);
+        Client client = clientManager.addClient(client1);
+        clientManager.removeClient(client.getId());
         Client client2 = clientManager.getClientById(client1.getId());
         assertNull(client2);
     }

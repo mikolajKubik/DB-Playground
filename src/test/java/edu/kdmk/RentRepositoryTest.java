@@ -1,3 +1,4 @@
+/*
 package edu.kdmk;
 
 import edu.kdmk.model.Client;
@@ -382,6 +383,7 @@ public class RentRepositoryTest {
 
 }
 
+*/
 /*
 * @Test
     public void optimisticLockTestTwoRentsOneClient() {

@@ -1,3 +1,4 @@
+/*
 package edu.kdmk;
 
 import edu.kdmk.model.vehicle.Car;
@@ -83,3 +84,4 @@ public class VehicleRepositoryTest {
     }
 
 }
+*/

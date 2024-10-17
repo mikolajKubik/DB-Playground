@@ -41,7 +41,6 @@
             <version>5.9.0</version>
         </dependency>
 
-
 <!--         https://mvnrepository.com/artifact/org.hibernate/hibernate-validator-->
 <!--        <dependency>-->
 <!--            <groupId>org.hibernate</groupId>-->

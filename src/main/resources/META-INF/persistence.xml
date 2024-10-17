@@ -19,18 +19,18 @@
       <property name="jakarta.persistence.jdbc.password" value="strong-password" /> <!-- DB Password -->
 
       <!-- Dla bazy danych obsługującej poziom READ_COMMITTED -->
-      <property name="javax.persistence.jdbc.isolation" value="2"/>
+      <property name="jakarta.persistence.jdbc.isolation" value="2"/>
       <!-- Alternatywna opcja zależna od bazy danych -->
       <property name="hibernate.connection.isolation" value="2"/>
 
       <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/> <!-- DB Dialect -->
       <property name="hibernate.hbm2ddl.auto" value="update" /> <!-- create / create-drop / update -->
 
-<!--      <property name="hibernate.hikari.minimumIdle" value="5" /> &lt;!&ndash; Minimum number of idle connections in the pool &ndash;&gt;-->
-<!--      <property name="hibernate.hikari.maximumPoolSize" value="20" /> &lt;!&ndash; Maximum number of connections in the pool &ndash;&gt;-->
-<!--      <property name="hibernate.hikari.idleTimeout" value="300000" /> &lt;!&ndash; Idle connection timeout in milliseconds &ndash;&gt;-->
-<!--      <property name="hibernate.hikari.connectionTimeout" value="30000" /> &lt;!&ndash; Connection timeout in milliseconds &ndash;&gt;-->
-<!--      <property name="hibernate.hikari.maxLifetime" value="1800000" /> &lt;!&ndash; Maximum lifetime of a connection in milliseconds &ndash;&gt;-->
+      <property name="hibernate.hikari.minimumIdle" value="5" /> <!-- Minimum number of idle connections in the pool -->
+      <property name="hibernate.hikari.maximumPoolSize" value="20" /> <!-- Maximum number of connections in the pool -->
+      <property name="hibernate.hikari.idleTimeout" value="300000" /> <!-- Idle connection timeout in milliseconds -->
+      <property name="hibernate.hikari.connectionTimeout" value="30000" /> <!-- Connection timeout in milliseconds -->
+      <property name="hibernate.hikari.maxLifetime" value="1800000" /> <!-- Maximum lifetime of a connection in milliseconds -->
 
       <property name="hibernate.show_sql" value="true" /> <!-- Show SQL in console -->
       <property name="hibernate.format_sql" value="true" />  <!-- Show SQL formatted -->

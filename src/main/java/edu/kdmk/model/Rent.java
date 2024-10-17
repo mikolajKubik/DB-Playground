@@ -24,7 +24,6 @@ public class Rent {
     @Version
     private long version;
 
-    //zmienic
     @Basic(optional = false)
     private Date startDate;
 
@@ -32,7 +31,10 @@ public class Rent {
     private Date endDate;
 
     @Basic(optional = false)
-    private int price;
+    private int rentPrice;
+
+    @Basic(optional = false)
+    private boolean isReturned = false;
 
     @ManyToOne
     @JoinColumn(name = "client_id")

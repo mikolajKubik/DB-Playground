@@ -2,7 +2,6 @@ package edu.kdmk.managers;
 
 import edu.kdmk.model.Client;
 import edu.kdmk.repositories.EntityRepository;
-import edu.kdmk.repositories.implemntations.ClientRepository;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.AllArgsConstructor;
 
@@ -34,7 +33,11 @@ public class ClientManager {
         var em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
-            Client client = em.find(Client.class, id);
+            Client client = clientRepository.getById(id, em);
+            if (client == null) {
+                em.getTransaction().rollback();
+                throw new IllegalArgumentException();
+            }
             clientRepository.remove(client, em);
             em.getTransaction().commit();
         } catch (Exception e) {
@@ -46,12 +49,14 @@ public class ClientManager {
         return true;
     }
 
-    public Client updateClient(Client client) { // To nie będzie działać z tego powodu, że client będzie detatached
-        // Ponieaż entityManager, który go stowrzył już został usunety
-        // Aha podobo wam działa to ide spać elo pyk pyk pyk nie elo
+    public Client updateClient(Client client) {
         var em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
+            if (client == null) {
+                em.getTransaction().rollback();
+                throw new IllegalArgumentException();
+            }
             clientRepository.update(client, em);
             em.getTransaction().commit();
         } catch (Exception e) {

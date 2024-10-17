@@ -3,7 +3,6 @@ package edu.kdmk.managers;
 
 import edu.kdmk.model.vehicle.Vehicle;
 import edu.kdmk.repositories.EntityRepository;
-import edu.kdmk.repositories.implemntations.VehicleRepository;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.AllArgsConstructor;
 
@@ -17,9 +16,10 @@ public class VehicleManager {
 
     public Vehicle addVehicle(Vehicle vehicle) {
         var em = emf.createEntityManager();
+        Vehicle result;
         try {
             em.getTransaction().begin();
-            vehicleRepository.add(vehicle, em);
+            result = vehicleRepository.add(vehicle, em);
             em.getTransaction().commit();
         } catch (Exception e) {
             em.getTransaction().rollback();
@@ -27,15 +27,15 @@ public class VehicleManager {
         } finally {
             em.close();
         }
-        return vehicle;
+        return result;
     }
 
-    public boolean removeVehicle(Vehicle vehicle) {
+    public boolean removeVehicle(long id) {
         var em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
-            Vehicle vehicleToRemove = vehicleRepository.getById(vehicle.getId(), em);
-            vehicleRepository.remove(vehicleToRemove, em);
+            Vehicle vehicle = vehicleRepository.getById(id, em);
+            vehicleRepository.remove(vehicle, em);
             em.getTransaction().commit();
         } catch (Exception e) {
             em.getTransaction().rollback();

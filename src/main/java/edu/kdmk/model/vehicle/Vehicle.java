@@ -15,7 +15,6 @@ import java.util.List;
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString()
-//@MappedSuperclass
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Vehicle {
@@ -41,7 +40,7 @@ public abstract class Vehicle {
     private int year;
 
     @Basic(optional = false)
-    private int price;
+    private int pricePerDay;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "vehicle")

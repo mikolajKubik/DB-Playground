@@ -18,19 +18,14 @@ public class VehicleRepository implements EntityRepository<Vehicle> {
         } catch (Exception e) {
             throw e;
         }
-        return item;
+        return em.find(Vehicle.class, item.getId());
     }
 
     @Override
     public boolean remove(Vehicle item, EntityManager em) {
         try {
-            if (item != null) {
-                em.remove(item);
-                return true;
-            } else {
-                em.getTransaction().rollback();
-                return false;
-            }
+            em.remove(item);
+            return true;
         } catch (Exception e) {
             throw e;
         }
@@ -39,13 +34,7 @@ public class VehicleRepository implements EntityRepository<Vehicle> {
     @Override
     public Vehicle update(Vehicle item, EntityManager em) {
         try {
-            if (item != null) {
-                em.merge(item);
-                return item;
-            } else {
-                em.getTransaction().rollback();
-                return null;
-            }
+            return em.merge(item);
         } catch (Exception e) {
             throw e;
         }
@@ -59,8 +48,6 @@ public class VehicleRepository implements EntityRepository<Vehicle> {
             throw e;
         }
     }
-
-
 
     @Override
     public List<Vehicle> getAll(EntityManager em) {

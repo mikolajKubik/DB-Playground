@@ -6,7 +6,6 @@ import edu.kdmk.model.Client;
 import edu.kdmk.repositories.EntityRepository;
 import edu.kdmk.repositories.implemntations.ClientRepository;
 import jakarta.persistence.*;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,34 +39,43 @@ public class ClientRepositoryTest {
 
     @Test
     public void addClientTest() {
-        clientManager.addClient(client1);
-        Client client2 = clientManager.getClientById(client1.getId());
-        assertEquals(client2, client1);
+        Client addedClient = clientManager.addClient(client1);
+        Client client2 = clientManager.getClientById(addedClient.getId());
+        assertEquals(addedClient, client2);
     }
 
     @Test
     public void updateClientTest() {
-        clientManager.addClient(client1);
-        client1.setName("Adam B");
-        System.out.println(clientManager.updateClient(client1).getName());
-        Client client2 = clientManager.getClientById(client1.getId());
-        assertEquals(client2.getName(), "Adam B");
+        Client client = clientManager.addClient(client1);
+        client.setName("Adam B");
+        Client updatedClient = clientManager.updateClient(client);
+        assertEquals(updatedClient.getName(), "Adam B");
+    }
+
+    @Test
+    public void updateClientNullTest() {
+        Client client = null;
+        assertThrows(IllegalArgumentException.class, () -> clientManager.updateClient(client));
     }
 
     @Test
     public void removeClientTest() {
         Client client = clientManager.addClient(client1);
-        clientManager.removeClient(client.getId());
+        assertTrue(clientManager.removeClient(client.getId()));
         Client client2 = clientManager.getClientById(client1.getId());
         assertNull(client2);
     }
 
     @Test
-    public void getByIdTest() {
-        clientManager.addClient(client1);
-        Client client2 = clientManager.getClientById(client1.getId());
-        assertEquals(client2, client1);
+    public void removeClientNullTest() {
+        assertThrows(IllegalArgumentException.class, () -> clientManager.removeClient(0));
     }
 
+    @Test
+    public void getByIdTest() {
+        Client client = clientManager.addClient(client1);
+        Client client2 = clientManager.getClientById(client.getId());
+        assertEquals(client, client2);
+    }
 }
 

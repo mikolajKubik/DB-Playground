@@ -4,13 +4,11 @@ import edu.kdmk.model.Client;
 import edu.kdmk.model.Rent;
 import edu.kdmk.model.vehicle.Vehicle;
 import edu.kdmk.repositories.EntityRepository;
-import edu.kdmk.repositories.implemntations.ClientRepository;
-import edu.kdmk.repositories.implemntations.RentRepository;
-import edu.kdmk.repositories.implemntations.VehicleRepository;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.LockModeType;
 import lombok.AllArgsConstructor;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @AllArgsConstructor
@@ -23,6 +21,11 @@ public class RentManager {
 
     public Rent addRent(Rent rent) {
         var em = emf.createEntityManager();
+
+        rent.setRentPrice(rent.getVehicle().getPricePerDay() *
+                (int) (rent.getEndDate().toLocalDate().toEpochDay() -
+                        rent.getStartDate().toLocalDate().toEpochDay()));
+
         try {
             em.getTransaction().begin();
             Vehicle vehicleToRent = vehicleRepository.getById(rent.getVehicle().getId(), em);
@@ -36,7 +39,7 @@ public class RentManager {
 
             } else {
                 em.getTransaction().rollback();
-                throw new IllegalArgumentException("Vehicle has too many rents or client has too many rents");
+                throw new IllegalArgumentException();
             }
             em.getTransaction().commit();
         } catch (Exception e) {
@@ -48,60 +51,66 @@ public class RentManager {
         return rent;
     }
 
-    public boolean removeRent(Rent rent) {
+    public Rent endRent(long id) {
         var em = emf.createEntityManager();
+        Rent result;
         try {
             em.getTransaction().begin();
-            Rent rentToRemove = rentRepository.getById(rent.getId(), em);
+            Rent endRent = rentRepository.getById(id, em);
 
-            if (rentToRemove == null) {
+            if (endRent == null) {
                 em.getTransaction().rollback();
-                throw new IllegalArgumentException("Rent not found");
+                throw new IllegalArgumentException();
             }
 
-            Vehicle vehicle = rentRepository.getById(rent.getId(), em).getVehicle();
-            Client client = rentRepository.getById(rent.getId(), em).getClient();
+            Vehicle vehicle = rentRepository.getById(id, em).getVehicle();
+            Client client = rentRepository.getById(id, em).getClient();
 
-            if (vehicle != null && client != null) {
-                vehicle.getRents().remove(rent);
-                client.getRents().remove(rent);
-                rentRepository.remove(rentToRemove, em);
-            } else {
-                em.getTransaction().rollback();
-                throw new IllegalArgumentException("Vehicle or client not found");
-            }
+            vehicle.getRents().remove(endRent);
+            client.getRents().remove(endRent);
+
+            endRent.setEndDate(Date.valueOf(LocalDate.now()));
+            endRent.setReturned(true);
+            result = rentRepository.update(endRent, em);
+
             em.getTransaction().commit();
+
         } catch (Exception e) {
             em.getTransaction().rollback();
             throw e;
         } finally {
             em.close();
         }
-        return true;
+        return result;
     }
 
-    public Rent updateRent(Rent rent) {
+    public Rent changeRentLength(long id, int days) {
         var em = emf.createEntityManager();
+        Rent result;
         try {
             em.getTransaction().begin();
+            Rent rent = rentRepository.getById(id, em);
 
-            Rent existingRent = rentRepository.getById(rent.getId(), em);
-            if (existingRent == null) {
+            if (rent == null) {
                 em.getTransaction().rollback();
-                throw new IllegalArgumentException("Rent with ID " + rent.getId() + " not found.");
+                throw new IllegalArgumentException();
             }
 
-            // Update the rent
-            rentRepository.update(rent, em);
+            rent.setEndDate(Date.valueOf(rent.getEndDate().toLocalDate().plusDays(days)));
+            rent.setRentPrice(rent.getVehicle().getPricePerDay() *
+                    (int) (rent.getEndDate().toLocalDate().toEpochDay() -
+                            rent.getStartDate().toLocalDate().toEpochDay()));
+            result = rentRepository.update(rent, em);
 
             em.getTransaction().commit();
-            return rent;
+
         } catch (Exception e) {
             em.getTransaction().rollback();
             throw e;
         } finally {
             em.close();
         }
+        return result;
     }
 
 

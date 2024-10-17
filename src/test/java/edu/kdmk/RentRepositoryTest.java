@@ -12,7 +12,6 @@ import edu.kdmk.repositories.EntityRepository;
 import edu.kdmk.repositories.implemntations.ClientRepository;
 import edu.kdmk.repositories.implemntations.RentRepository;
 import edu.kdmk.repositories.implemntations.VehicleRepository;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.*;
@@ -62,7 +61,7 @@ public class RentRepositoryTest {
                 .brand("Toyota")
                 .model("Corolla")
                 .year(2021)
-                .price(100)
+                .pricePerDay(100)
                 .numberOfDoors(5)
                 .numberOfSeats(5)
                 .build();
@@ -72,7 +71,7 @@ public class RentRepositoryTest {
                 .brand("Opel")
                 .model("Insignia")
                 .year(2023)
-                .price(130)
+                .pricePerDay(130)
                 .numberOfDoors(5)
                 .numberOfSeats(5)
                 .build();
@@ -95,37 +94,59 @@ public class RentRepositoryTest {
     @Test
     public void addRentTest() {
 
-        cManager.addClient(client1);
-        vManager.addVehicle(vehicle1);
+        Client client = cManager.addClient(client1);
+        Vehicle vehicle = vManager.addVehicle(vehicle1);
 
         var rent = Rent.builder()
-                .client(client1)
-                .vehicle(vehicle1)
+                .client(client)
+                .vehicle(vehicle)
                 .startDate(Date.valueOf(LocalDate.now()))
                 .endDate(Date.valueOf(LocalDate.now().plusDays(5)))
                 .build();
 
-        rManager.addRent(rent);
-
-
-        Rent rentFromDb = rManager.getRentById(rent.getId());
-        assertEquals(rent, rentFromDb);
+        Rent addedRent = rManager.addRent(rent);
+        System.out.println(addedRent.getId());
+        Rent rent2 = rManager.getRentById(addedRent.getId());
+        assertEquals(addedRent, rent2);
     }
 
     @Test
-    public void removeRentTest() {
-        cManager.addClient(client1);
-        vManager.addVehicle(vehicle1);
+    public void endRentTest() {
+        Client client = cManager.addClient(client1);
+        Vehicle vehicle = vManager.addVehicle(vehicle1);
 
         var rent = Rent.builder()
-                .client(client1)
-                .vehicle(vehicle1)
+                .client(client)
+                .vehicle(vehicle)
                 .startDate(Date.valueOf(LocalDate.now()))
                 .endDate(Date.valueOf(LocalDate.now().plusDays(5)))
                 .build();
 
-        rManager.addRent(rent);
-        assertTrue(rManager.removeRent(rent));
+        Rent addedRent = rManager.addRent(rent);
+        Rent endedRent = rManager.endRent(addedRent.getId());
+        assertTrue(endedRent.isReturned());
+    }
+
+    @Test
+    public void endRentNullTest() {
+        assertThrows(IllegalArgumentException.class, () -> rManager.endRent(0));
+    }
+
+    @Test
+    public void changeRentLength() {
+        Client client = cManager.addClient(client1);
+        Vehicle vehicle = vManager.addVehicle(vehicle1);
+
+        var rent = Rent.builder()
+                .client(client)
+                .vehicle(vehicle)
+                .startDate(Date.valueOf(LocalDate.now()))
+                .endDate(Date.valueOf("2024-10-20"))
+                .build();
+
+        Rent addedRent = rManager.addRent(rent);
+        Rent changedRent = rManager.changeRentLength(addedRent.getId(), 5);
+        assertEquals(changedRent.getEndDate(), Date.valueOf("2024-10-25"));
     }
 
     @Test
@@ -145,28 +166,44 @@ public class RentRepositoryTest {
     }
 
     @Test
-    public void updateRentTest() { //  Ale co robi ten test to nie mam pojęcia co nie xD
-        // ale już działa, był problem bo 2 transakcje chciały updateować go po sobie a nie dostawwały z bazy nowej wersji
-        // wieć poprawnie dostawaliście optimnistica locka wyjątekiem na morde okok?
+    public void testRentVehicleLimit() {
+//        var cRepo = new ClientRepository();
+//        var vRepo = new VehicleRepository();
+//
+//        cRepo.add(client1);
+//        cRepo.add(client2);
+//        vRepo.add(vehicle1);
+        var cManager = new ClientManager(emf, new ClientRepository());
+        var vManager = new VehicleManager(emf, new VehicleRepository());
+
         cManager.addClient(client1);
         vManager.addVehicle(vehicle1);
+        vManager.addVehicle(vehicle2);
 
-        var rent = Rent.builder()
+        var rent1 = Rent.builder()
                 .client(client1)
                 .vehicle(vehicle1)
                 .startDate(Date.valueOf(LocalDate.now()))
                 .endDate(Date.valueOf(LocalDate.now().plusDays(5)))
                 .build();
 
-        rManager.addRent(rent);
 
-        assertEquals(rent, rManager.getRentById(rent.getId()));
+//        var rRepo = new RentRepository();
+//        rRepo.add(rent1);
+        var rManager = new RentManager(emf, new RentRepository(), new VehicleRepository(), new ClientRepository());
+        rManager.addRent(rent1);
 
-        var rentFromDb = rManager.getRentById(rent.getId());
-        rentFromDb.setEndDate(Date.valueOf(LocalDate.now().plusDays(10)));
+        var rent2 = Rent.builder()
+                .client(client2)
+                .vehicle(vehicle1)
+                .startDate(Date.valueOf(LocalDate.now()))
+                .endDate(Date.valueOf(LocalDate.now().plusDays(5)))
+                .build();
 
-        assertEquals(rManager.updateRent(rentFromDb).getId(), rent.getId());
+        assertThrows(IllegalArgumentException.class, () -> rManager.addRent(rent2));
+
     }
+
 
     @Test
     public void optimisticLockTestTwoRentsOneClient() {
@@ -361,131 +398,7 @@ public class RentRepositoryTest {
 //
 //
 //
-    @Test
-    public void testRentVehicleLimit() {
-//        var cRepo = new ClientRepository();
-//        var vRepo = new VehicleRepository();
-//
-//        cRepo.add(client1);
-//        cRepo.add(client2);
-//        vRepo.add(vehicle1);
-        var cManager = new ClientManager(emf, new ClientRepository());
-        var vManager = new VehicleManager(emf, new VehicleRepository());
 
-        cManager.addClient(client1);
-        vManager.addVehicle(vehicle1);
-        vManager.addVehicle(vehicle2);
-
-        var rent1 = Rent.builder()
-                .client(client1)
-                .vehicle(vehicle1)
-                .startDate(Date.valueOf(LocalDate.now()))
-                .endDate(Date.valueOf(LocalDate.now().plusDays(5)))
-                .build();
-
-
-//        var rRepo = new RentRepository();
-//        rRepo.add(rent1);
-        var rManager = new RentManager(emf, new RentRepository(), new VehicleRepository(), new ClientRepository());
-        rManager.addRent(rent1);
-
-        var rent2 = Rent.builder()
-                .client(client2)
-                .vehicle(vehicle1)
-                .startDate(Date.valueOf(LocalDate.now()))
-                .endDate(Date.valueOf(LocalDate.now().plusDays(5)))
-                .build();
-
-        assertThrows(IllegalArgumentException.class, () -> rManager.addRent(rent2));
-
-    }
 
 }
 
-
-/*
-* @Test
-    public void optimisticLockTestTwoRentsOneClient() {
-        var cRepo = new ClientRepository();
-        var vRepo = new VehicleRepository();
-
-        cRepo.add(client1);
-        vRepo.add(vehicle1);
-        vRepo.add(vehicle2);
-
-        var rent1 = Rent.builder()
-                .client(client1)
-                .vehicle(vehicle1)
-                .startDate(Date.valueOf(LocalDate.now()))
-                .endDate(Date.valueOf(LocalDate.now().plusDays(5)))
-                .build();
-
-        var rent2 = Rent.builder()
-                .client(client1)
-                .vehicle(vehicle2)
-                .startDate(Date.valueOf(LocalDate.now()))
-                .endDate(Date.valueOf(LocalDate.now().plusDays(5)))
-                .build();
-
-        final boolean[] exceptionCaught = {false};
-
-        // Tworzymy CountDownLatch z wartością początkową 1, aby oba wątki czekały na sygnał startu
-        CountDownLatch latch = new CountDownLatch(1);
-        CountDownLatch latch2 = new CountDownLatch(2);
-
-        // Tworzenie ExecutorService do zarządzania wątkami
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-
-        // Tworzenie dwóch wątków, które dodają wypożyczenia
-        Runnable rentTask1 = () -> {
-            try {
-
-                var rRepo1 = new RentRepository();
-                latch.await();  // Czekamy na sygnał startu
-
-                rRepo1.add(rent1);
-                System.out.println("Rent1 added by thread: " + Thread.currentThread().getName());
-            } catch (Exception e) {
-                e.printStackTrace();
-                exceptionCaught[0] = true;
-            }finally {
-                latch2.countDown();
-            }
-        };
-
-        Runnable rentTask2 = () -> {
-            try {
-//                EntityManagerFactory entityManagerFactory3 = Persistence.createEntityManagerFactory("my-persistence-unit");
-                var rRepo2 = new RentRepository();
-                latch.await();  // Czekamy na sygnał startu
-                rRepo2.add(rent2);
-                System.out.println("Rent2 added by thread: " + Thread.currentThread().getName());
-//                entityManagerFactory3.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-                exceptionCaught[0] = true;
-            } finally {
-                latch2.countDown();
-            }
-        };
-
-        // Uruchamianie obu wątków
-        executor.submit(rentTask1);
-        executor.submit(rentTask2);
-
-        // Główny wątek zwalnia blokadę, aby oba wątki mogły się rozpocząć
-        System.out.println("Main thread releasing latch...");
-        latch.countDown();
-
-        try {
-            latch2.await();
-            System.out.println("Both threads have completed.");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            executor.shutdown();
-        }
-
-        assertTrue(exceptionCaught[0]);
-    }
-* */

@@ -32,15 +32,8 @@ public class ClientRepository implements EntityRepository<Client> {
 
     @Override
     public Client update(Client item, EntityManager em) {
-
         try {
-            if (item != null) {
-                em.merge(item);
-                return item;
-            } else {
-                em.getTransaction().rollback();
-                return null;
-            }
+            return em.merge(item);
         } catch (Exception e) {
             throw e;
         }
@@ -48,11 +41,8 @@ public class ClientRepository implements EntityRepository<Client> {
 
     @Override
     public Client getById(Long id, EntityManager em) {
-
         try {
-
             return em.find(Client.class, id, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
-
         } catch (Exception e) {
             throw e;
         }
@@ -61,12 +51,8 @@ public class ClientRepository implements EntityRepository<Client> {
 
     @Override
     public List<Client> getAll(EntityManager em) {
-
-
         try {
-
             return em.createQuery("SELECT c FROM Client c", Client.class).getResultList();
-
         } catch (Exception e) {
             throw e;
         }

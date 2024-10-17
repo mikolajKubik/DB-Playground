@@ -18,7 +18,7 @@ public class RentRepository implements EntityRepository<Rent> {
         } catch (Exception e) {
             throw e;
         }
-        return item;
+        return em.find(Rent.class, item.getId());
     }
 
     @Override
@@ -27,12 +27,11 @@ public class RentRepository implements EntityRepository<Rent> {
             em.merge(item.getVehicle());
             em.merge(item.getClient());
             em.remove(item);
-
+            return true;
         } catch (Exception e) {
             em.getTransaction().rollback();
             throw e;
         }
-        return true;
     }
 
     @Override

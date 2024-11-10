@@ -1,67 +1,27 @@
 package edu.kdmk;
 
 import edu.kdmk.config.MongoDBConnection;
+import edu.kdmk.managers.ClientManager;
 import edu.kdmk.models.Client;
-import edu.kdmk.models.Rent;
-import edu.kdmk.models.vehicle.Car;
-import edu.kdmk.models.vehicle.Vehicle;
 import edu.kdmk.repositories.ClientRepository;
 
-import java.sql.Date;
-import java.time.LocalDate;
+import java.util.UUID;
 
 public class Main {
     public static void main(String[] args) {
 
+        MongoDBConnection connection = new MongoDBConnection();
 
-//        Client client = new Client("Jan", "Kowalski", "123456789", "fajna 12");
-//
-//        Vehicle vehicle = new Car("XDD44", "BMW", "X5", 2020, "black", 200, 4, 5);
-//
-//        Rent rent = new Rent(Date.valueOf(LocalDate.now()), Date.valueOf(LocalDate.now().plusDays(5)), 200, client, vehicle);
-//
-//        System.out.println(client.toString());
-//
-//        System.out.println(vehicle.toString());
-//
-//        System.out.println(rent.toString());
+        ClientRepository clientRepository = new ClientRepository(connection.getCollection("clients", Client.class));
 
+        ClientManager clientManager = new ClientManager(connection, clientRepository);
 
-        try (MongoDBConnection connection = new MongoDBConnection()) {
-            // Create the ClientRepository using the MongoDB connection
-            ClientRepository clientRepository = new ClientRepository(connection);
+        // Create a new client instance
+        Client newClient = new Client("John", "Doe", "123-456-7890", "123 Main St, Anytown, USA");
 
-            // Generate a random Client
-            Client randomClient = new Client(
-                    "John",
-                    "Doe",
-                    "123-456-7890",
-                    "123 Random Street, City, Country"
-            );
+        // Perform the transaction to add the client to the database
+        clientManager.performTransaction(newClient);
 
-            // Insert the random Client into the database
-            clientRepository.create(randomClient);
-
-            // Print out the inserted Client details
-            System.out.println("Inserted Client: " + randomClient);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-
-
-
-
-        /*System.out.println("Hello world!");
-
-        // Test the connection by attempting to start a session
-        try (MongoDBConnection mongoDBConnection = new MongoDBConnection()) {
-            mongoDBConnection.startSession(); // Try to start a session to test the connection
-            System.out.println("Connection successful!");
-        } catch (Exception e) {
-            System.err.println("Failed to connect to MongoDB: " + e.getMessage());
-        }
-        // Close the connection after testing*/
+        connection.close();
     }
 }

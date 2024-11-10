@@ -1,0 +1,141 @@
+# docker compose -f docker-compose-windows.yml up -d
+# docker compose -f docker-compose-windows.yml down -v
+networks:
+  mongo-network:
+    driver: bridge
+
+volumes:
+  mongo1-data:
+  mongo2-data:
+  mongo3-data:
+  mongo-rs-key:
+
+services:
+  mongo1:
+    image: mongo:8.0.1
+    container_name: mongo_1
+    hostname: mongo1
+    ports:
+      - 27017:27017
+    networks:
+      - mongo-network
+    volumes:
+      - mongo1-data:/data/db
+      - mongo-rs-key:/etc/mongodb/pki
+    command: >
+      bash -c '
+      [ ! -f /etc/mongodb/pki/rs_keyfile ] &&
+      (openssl rand -base64 756 > /etc/mongodb/pki/rs_keyfile && chmod 400 /etc/mongodb/pki/rs_keyfile);
+      mongod --port 27017 --replSet rs0 --bind_ip_all --auth --keyFile /etc/mongodb/pki/rs_keyfile
+      '
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 2s
+      retries: 5
+
+  mongo2:
+    image: mongo:8.0.1
+    container_name: mongo_2
+    hostname: mongo2
+    ports:
+      - 27018:27018
+    networks:
+      - mongo-network
+    volumes:
+      - mongo2-data:/data/db
+      - mongo-rs-key:/etc/mongodb/pki
+    command: >
+      bash -c '
+      mongod --port 27018 --replSet rs0 --bind_ip_all --auth --keyFile /etc/mongodb/pki/rs_keyfile'
+    restart: unless-stopped
+    depends_on:
+      mongo1:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "127.0.0.1:27018",
+          "--eval",
+          "db.adminCommand('ping')",
+        ]
+      interval: 10s
+      timeout: 2s
+      retries: 5
+
+  mongo3:
+    image: mongo:8.0.1
+    container_name: mongo_3
+    hostname: mongo3
+    ports:
+      - 27019:27019
+    networks:
+      - mongo-network
+    volumes:
+      - mongo3-data:/data/db
+      - mongo-rs-key:/etc/mongodb/pki
+    command: >
+      bash -c '
+      (
+        sleep 20;
+        mongosh 127.0.0.1:27019 --eval "
+        rs.initiate({
+          _id: \"rs0\",
+          version: 1,
+          members: [
+            { _id: 0, host: \"mongo1:27017\" },
+            { _id: 1, host: \"mongo2:27018\" },
+            { _id: 2, host: \"mongo3:27019\" }
+          ]
+        });
+        ";
+        sleep 20;
+        mongosh 127.0.0.1:27019 --eval "db.getSiblingDB(\"admin\").createUser({ user: \"root\", pwd: \"root\", roles: [ { role: \"root\", db: \"admin\" } ] })";
+      ) &
+      exec mongod --port 27019 --replSet rs0 --bind_ip_all --auth --keyFile /etc/mongodb/pki/rs_keyfile
+      '
+    restart: unless-stopped
+    depends_on:
+      mongo2:
+        condition: service_healthy
+      mongo1:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "127.0.0.1:27019",
+          "--eval",
+          "db.adminCommand('ping')",
+        ]
+      interval: 10s
+      timeout: 2s
+      retries: 5
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo_express
+    ports:
+      - 8081:8081
+    networks:
+      - mongo-network
+
+    depends_on:
+      mongo3:
+        condition: service_healthy
+      mongo2:
+        condition: service_healthy
+      mongo1:
+        condition: service_healthy
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: root
+      ME_CONFIG_BASICAUTH_USERNAME: root
+      ME_CONFIG_BASICAUTH_PASSWORD: root
+      ME_CONFIG_MONGODB_URL: mongodb://root:root@mongo1:27017,mongo2:27018,mongo3:27019/?replicaSet=rs0&authSource=admin
+
+    restart: unless-stopped

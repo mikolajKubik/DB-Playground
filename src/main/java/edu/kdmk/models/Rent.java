@@ -1,6 +1,6 @@
 package edu.kdmk.models;
 
-import edu.kdmk.models.vehicle.Vehicle;
+import edu.kdmk.models.game.Game;
 import lombok.*;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
@@ -28,14 +28,14 @@ public class Rent extends AbstractEntity {
     private Client client;
 
     @BsonProperty("vehicle")
-    private Vehicle vehicle;
+    private Game game;
 
-    public Rent(Date startDate, Date endDate, int rentalPrice, Client client, Vehicle vehicle) {
+    public Rent(Date startDate, Date endDate, int rentalPrice, Client client, Game game) {
         super(UUID.randomUUID());
         this.startDate = startDate;
         this.endDate = endDate;
         this.rentalPrice = rentalPrice;
         this.client = client;
-        this.vehicle = vehicle;
+        this.game = game;
     }
 }

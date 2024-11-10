@@ -112,10 +112,10 @@ public class MongoDBConnection implements AutoCloseable {
 
 
             // Windows connection string
-            //connectionString = "mongodb://root:root@mongo1:27017,mongo2:27018,mongo3:27019/?replicaSet=rs0&authSource=admin";
+            connectionString = "mongodb://root:root@mongo1:27017,mongo2:27018,mongo3:27019/?replicaSet=rs0&authSource=admin";
 
             // MacOS connection string
-            connectionString = "mongodb://root:root@111.222.32.4:27017,111.222.32.3:27018,111.222.32.2:27019/?replicaSet=rs0&authSource=admin";
+            //connectionString = "mongodb://root:root@111.222.32.4:27017,111.222.32.3:27018,111.222.32.2:27019/?replicaSet=rs0&authSource=admin";
 
             // Default or other OS fallback connection string
             //connectionString = "mongodb://root:root@localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0&authSource=admin";

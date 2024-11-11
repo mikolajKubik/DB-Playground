@@ -36,7 +36,7 @@ public class ClientRepository {
 
     public Optional<Client> getClient(UUID id) {
         try {
-            Bson filter = Filters.eq("id", id);
+            Bson filter = Filters.eq("id", id.toString());
             return Optional.ofNullable(clientCollection.find(filter).first());
         } catch (Exception e) {
             throw e;

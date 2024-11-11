@@ -36,26 +36,91 @@ public class GameRepository {
 
     public Optional<Game> getGame(UUID id) {
         try {
-            Bson filter = Filters.eq("id", id);
+            Bson filter = Filters.eq("id", id.toString());
+            System.out.println(gameCollection.find(filter).first());
+
+
+
             return Optional.ofNullable(gameCollection.find(filter).first());
         } catch (Exception e) {
             throw e;
         }
     }
 
-    // zle jest trzebe przerobic na pewno bo wchodzi tu dziedziczenie
     public boolean updateGame(ClientSession session, Game game) {
         try {
             Bson filter = Filters.eq("id", game.getUuid());
-            Bson update = Updates.combine(
-                    Updates.set("gameName", game.getGameName()),
-                    Updates.set("recommendedAge", game.getRecommendedAge()),
-                    Updates.set("releaseYear", game.getReleaseYear()),
-                    Updates.set("publisher", game.getPublisher())
-            );
-            return gameCollection.updateOne(session, filter, update).wasAcknowledged();
+            return gameCollection.replaceOne(session, filter, game).wasAcknowledged();
         } catch (Exception e) {
-            throw e;
+            throw new RuntimeException("Failed to update game", e);
         }
     }
+
+    public boolean startRent(ClientSession session, UUID gameId) {
+        // Filter to find games with the specified ID and that are not currently rented
+        Bson filter = Filters.and(
+                Filters.eq("id", gameId),
+                Filters.eq("isRented", 0)
+        );
+        Bson update = Updates.set("isRented", 1); // Set to 1 to indicate rented status
+
+        // Use findOneAndUpdate for atomic operation
+        Game updatedGame = gameCollection.findOneAndUpdate(
+                session,
+                filter,
+                update,
+                new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER)
+        );
+
+        // Return true if the update succeeded (i.e., a game was found and updated)
+        return updatedGame != null;
+    }
+
+    public boolean endRent(ClientSession session, UUID gameId) {
+        // Filter to find games with the specified ID and that are currently rented
+        Bson filter = Filters.and(
+                Filters.eq("id", gameId),
+                Filters.eq("isRented", 1)
+        );
+        Bson update = Updates.set("isRented", 0); // Set to 0 to indicate not rented
+
+        // Use findOneAndUpdate for atomic operation
+        Game updatedGame = gameCollection.findOneAndUpdate(
+                session,
+                filter,
+                update,
+                new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER)
+        );
+
+        // Return true if the update succeeded (i.e., a game was found and updated)
+        return updatedGame != null;
+    }
+
+//    public boolean startRent(ClientSession session, UUID gameId) {
+//        Bson filter = Filters.eq("id", gameId);
+//        Bson update = Updates.inc("isRented", 1);
+//        return gameCollection.updateOne(session, filter, update).wasAcknowledged();
+//    }
+//
+//    public boolean endRent(ClientSession session, UUID gameId) {
+//        Bson filter = Filters.eq("id", gameId);
+//        Bson update = Updates.inc("isRented", -1);
+//        return gameCollection.updateOne(session, filter, update).wasAcknowledged();
+//    }
+
+    // zle jest trzebe przerobic na pewno bo wchodzi tu dziedziczenie
+//    public boolean updateGame(ClientSession session, Game game) {
+//        try {
+//            Bson filter = Filters.eq("id", game.getUuid());
+//            Bson update = Updates.combine(
+//                    Updates.set("gameName", game.getGameName()),
+//                    Updates.set("recommendedAge", game.getRecommendedAge()),
+//                    Updates.set("releaseYear", game.getReleaseYear()),
+//                    Updates.set("publisher", game.getPublisher())
+//            );
+//            return gameCollection.updateOne(session, filter, update).wasAcknowledged();
+//        } catch (Exception e) {
+//            throw e;
+//        }
+//    }
 }

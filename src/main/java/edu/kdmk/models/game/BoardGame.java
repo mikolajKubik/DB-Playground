@@ -26,7 +26,7 @@ public class BoardGame extends Game {
                      @BsonProperty("price_per_day") int pricePerDay,
                      @BsonProperty("number_of_players") int numberOfPlayers,
                      @BsonProperty("average_play_time") int averagePlayTime) {
-        super(gameName, recommendedAge, releaseYear, publisher, pricePerDay);
+        super(gameName, recommendedAge, releaseYear, publisher, pricePerDay, GameType.BOARD_GAME);
         this.numberOfPlayers = numberOfPlayers;
         this.averagePlayTime = averagePlayTime;
     }

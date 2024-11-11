@@ -63,6 +63,9 @@ public abstract class Game extends AbstractEntity {
     @BsonProperty("price_per_day")
     private int pricePerDay;
 
+    @BsonProperty("type")
+    private String type;
+
     @BsonCreator
     public Game(@BsonProperty("id") UUID id,
                 @BsonProperty("game_name") String gameName,
@@ -70,7 +73,8 @@ public abstract class Game extends AbstractEntity {
                 @BsonProperty("release_year") int releaseYear,
                 @BsonProperty("publisher") String publisher,
                 @BsonProperty("price_per_day") int pricePerDay,
-                @BsonProperty("is_rented") int isRented) {
+                @BsonProperty("is_rented") int isRented,
+                @BsonProperty("type") String type) {
         super(id);
         this.gameName = gameName;
         this.recommendedAge = recommendedAge;
@@ -78,9 +82,10 @@ public abstract class Game extends AbstractEntity {
         this.publisher = publisher;
         this.pricePerDay = pricePerDay;
         this.isRented = isRented;
+        this.type = type;
     }
 
-    public Game(String gameName, int recommendedAge, int releaseYear, String publisher, int pricePerDay) {
+    public Game(String gameName, int recommendedAge, int releaseYear, String publisher, int pricePerDay, GameType type) {
         super(UUID.randomUUID());
         this.gameName = gameName;
         this.recommendedAge = recommendedAge;
@@ -88,5 +93,14 @@ public abstract class Game extends AbstractEntity {
         this.publisher = publisher;
         this.pricePerDay = pricePerDay;
         this.isRented = 0;
+        this.type = type.name();
+    }
+
+    public GameType getGameType() {
+        return GameType.valueOf(this.type);
+    }
+
+    public void setGameType(GameType gameType) {
+        this.type = gameType.name();
     }
 }

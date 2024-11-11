@@ -70,26 +70,65 @@ public class GameManager {
         }
         return result;
     }
-    // trzeba zrobic dobrze, gdzies trzeba incrementa zrobic chyba albo metode start rent czy cos co podbija o 1 i end rent co zmniejsza o 1
-    public Optional<Game> updateGame(Game game) {
-        var session = mongoDBConnection.startSession();
-        Optional<Game> result;
-        try {
-            session.startTransaction();
 
+    public Optional<Game> updateGame(Game game) {
+        try (var session = mongoDBConnection.startSession()) {
+            session.startTransaction();
+            Optional<Game> result;
             if (gameRepository.updateGame(session, game)) {
                 result = Optional.of(game);
             } else {
                 result = Optional.empty();
             }
-
             session.commitTransaction();
+            return result;
         } catch (Exception e) {
-            session.abortTransaction();
-            throw e;
-        } finally {
-            session.close();
+            throw new RuntimeException("Failed to update game", e);
         }
-        return result;
     }
+
+    public boolean startRent(UUID gameId) {
+        try (var session = mongoDBConnection.startSession()) {
+            session.startTransaction();
+            boolean result = gameRepository.startRent(session, gameId);
+            session.commitTransaction();
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to start rent", e);
+        }
+    }
+
+    public boolean endRent(UUID gameId) {
+        try (var session = mongoDBConnection.startSession()) {
+            session.startTransaction();
+            boolean result = gameRepository.endRent(session, gameId);
+            session.commitTransaction();
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to end rent", e);
+        }
+    }
+
+    // trzeba zrobic dobrze, gdzies trzeba incrementa zrobic chyba albo metode start rent czy cos co podbija o 1 i end rent co zmniejsza o 1
+//    public Optional<Game> updateGame(Game game) {
+//        var session = mongoDBConnection.startSession();
+//        Optional<Game> result;
+//        try {
+//            session.startTransaction();
+//
+//            if (gameRepository.updateGame(session, game)) {
+//                result = Optional.of(game);
+//            } else {
+//                result = Optional.empty();
+//            }
+//
+//            session.commitTransaction();
+//        } catch (Exception e) {
+//            session.abortTransaction();
+//            throw e;
+//        } finally {
+//            session.close();
+//        }
+//        return result;
+//    }
 }

@@ -28,7 +28,7 @@ public class ComputerGame extends Game {
                         @BsonProperty("price_per_day") int pricePerDay,
                         @BsonProperty("platform") String platform,
                         @BsonProperty("is_multiplayer") boolean isMultiplayer) {
-        super(gameName, recommendedAge, releaseYear, publisher, pricePerDay);
+        super(gameName, recommendedAge, releaseYear, publisher, pricePerDay, GameType.COMPUTER_GAME);
         this.platform = platform;
         this.isMultiplayer = isMultiplayer;
     }

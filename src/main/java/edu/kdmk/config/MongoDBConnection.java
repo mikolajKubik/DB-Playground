@@ -148,6 +148,10 @@ public class MongoDBConnection implements AutoCloseable {
         return database.getCollection(collectionName, clazz);
     }
 
+    public MongoDatabase getDatabase() {
+        return database;
+    }
+
     @Override
     public void close() {
         mongoClient.close();

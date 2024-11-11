@@ -67,23 +67,26 @@ public class Client extends AbstractEntity {
     @BsonProperty("address")
     private String address;
 
+    @BsonProperty("rented_games")
+    private int rentedGames;
+
     @BsonCreator
-    public Client(
-            @BsonProperty("_id") UUID uuid,
-            @BsonProperty("first_name") String firstName,
-            @BsonProperty("last_name") String lastName,
-            @BsonProperty("phone_number") String phoneNumber,
-            @BsonProperty("address") String address
-    ) {
-        super(uuid);
+    public Client(@BsonProperty("id") UUID id,
+                  @BsonProperty("first_name") String firstName,
+                  @BsonProperty("last_name") String lastName,
+                  @BsonProperty("phone_number") String phoneNumber,
+                  @BsonProperty("address") String address,
+                  @BsonProperty("rented_games") int rentedGames) {
+        super(id);
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
         this.address = address;
+        this.rentedGames = rentedGames;
     }
 
     // Convenience constructor for creating a new Client with a generated UUID
     public Client(String firstName, String lastName, String phoneNumber, String address) {
-        this(UUID.randomUUID(), firstName, lastName, phoneNumber, address);
+        this(UUID.randomUUID(), firstName, lastName, phoneNumber, address, 0);
     }
 }

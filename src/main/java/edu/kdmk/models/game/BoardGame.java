@@ -1,9 +1,7 @@
+package edu.kdmk.models.game;
 
-package edu.kdmk.models.vehicle;
-
-
-import edu.kdmk.models.game.Game;
 import lombok.*;
+import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 @Data
@@ -20,21 +18,20 @@ public class BoardGame extends Game {
     @BsonProperty("average_play_time")
     private int averagePlayTime;
 
+    @BsonCreator
+    public BoardGame(@BsonProperty("game_name") String gameName,
+                     @BsonProperty("recommended_age") int recommendedAge,
+                     @BsonProperty("release_year") int releaseYear,
+                     @BsonProperty("publisher") String publisher,
+                     @BsonProperty("price_per_day") int pricePerDay,
+                     @BsonProperty("number_of_players") int numberOfPlayers,
+                     @BsonProperty("average_play_time") int averagePlayTime) {
+        super(gameName, recommendedAge, releaseYear, publisher, pricePerDay);
+        this.numberOfPlayers = numberOfPlayers;
+        this.averagePlayTime = averagePlayTime;
+    }
+
 }
-
-
-
-/*@BsonProperty("number_of_doors")
-    private int numberOfDoors;
-
-    @BsonProperty("number_of_seats")
-    private int numberOfSeats;
-
-    public BoardGame(String licensePlate, String brand, String model, int yearOfProduction, String color, int pricePerDay, int numberOfDoors, int numberOfSeats) {
-        super(licensePlate, brand, model, yearOfProduction, color, pricePerDay);
-        this.numberOfDoors = numberOfDoors;
-        this.numberOfSeats = numberOfSeats;
-    }*/
 
 
 

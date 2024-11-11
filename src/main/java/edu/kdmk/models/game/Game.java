@@ -2,7 +2,10 @@ package edu.kdmk.models.game;
 
 import edu.kdmk.models.AbstractEntity;
 import lombok.*;
+import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonProperty;
+
+import java.util.UUID;
 
 @Data
 @Getter
@@ -53,4 +56,37 @@ public abstract class Game extends AbstractEntity {
 
     @BsonProperty("publisher")
     protected String publisher;
+
+    @BsonProperty("is_rented")
+    private int isRented = 0;
+
+    @BsonProperty("price_per_day")
+    private int pricePerDay;
+
+    @BsonCreator
+    public Game(@BsonProperty("id") UUID id,
+                @BsonProperty("game_name") String gameName,
+                @BsonProperty("recommended_age") int recommendedAge,
+                @BsonProperty("release_year") int releaseYear,
+                @BsonProperty("publisher") String publisher,
+                @BsonProperty("price_per_day") int pricePerDay,
+                @BsonProperty("is_rented") int isRented) {
+        super(id);
+        this.gameName = gameName;
+        this.recommendedAge = recommendedAge;
+        this.releaseYear = releaseYear;
+        this.publisher = publisher;
+        this.pricePerDay = pricePerDay;
+        this.isRented = isRented;
+    }
+
+    public Game(String gameName, int recommendedAge, int releaseYear, String publisher, int pricePerDay) {
+        super(UUID.randomUUID());
+        this.gameName = gameName;
+        this.recommendedAge = recommendedAge;
+        this.releaseYear = releaseYear;
+        this.publisher = publisher;
+        this.pricePerDay = pricePerDay;
+        this.isRented = 0;
+    }
 }

@@ -1,37 +1,28 @@
 package edu.kdmk.models.game;
 
-import lombok.*;
-import org.bson.codecs.pojo.annotations.BsonCreator;
-import org.bson.codecs.pojo.annotations.BsonProperty;
+import java.util.UUID;
 
-@Data
-@Getter
-@Setter
-@ToString(callSuper = true)
-@NoArgsConstructor
-@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class BoardGame extends Game {
+    private int minPlayers;
+    private int maxPlayers;
 
-    @BsonProperty("number_of_players")
-    private int numberOfPlayers;
-
-    @BsonProperty("average_play_time")
-    private int averagePlayTime;
-
-    @BsonCreator
-    public BoardGame(@BsonProperty("game_name") String gameName,
-                     @BsonProperty("recommended_age") int recommendedAge,
-                     @BsonProperty("release_year") int releaseYear,
-                     @BsonProperty("publisher") String publisher,
-                     @BsonProperty("price_per_day") int pricePerDay,
-                     @BsonProperty("number_of_players") int numberOfPlayers,
-                     @BsonProperty("average_play_time") int averagePlayTime) {
-        super(gameName, recommendedAge, releaseYear, publisher, pricePerDay, GameType.BOARD_GAME);
-        this.numberOfPlayers = numberOfPlayers;
-        this.averagePlayTime = averagePlayTime;
+    public BoardGame(UUID id, String name, int minPlayers, int maxPlayers) {
+        super(id, name, GameType.BOARD_GAME);
+        this.minPlayers = minPlayers;
+        this.maxPlayers = maxPlayers;
     }
 
+    public BoardGame(String name, int minPlayers, int maxPlayers) {
+        super(name, GameType.BOARD_GAME); // UUID is auto-assigned
+        this.minPlayers = minPlayers;
+        this.maxPlayers = maxPlayers;
+    }
+
+    public int getMinPlayers() {
+        return minPlayers;
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
 }
-
-
-

@@ -2,59 +2,48 @@ package edu.kdmk.repositories;
 
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
+import com.mongodb.client.MongoDatabase;
 import edu.kdmk.models.Client;
-import org.bson.conversions.Bson;
+import org.bson.Document;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class ClientRepository {
     private final MongoCollection<Client> clientCollection;
 
-    public ClientRepository(MongoCollection<Client> clientCollection) {
-        this.clientCollection = clientCollection;
+    public ClientRepository(MongoDatabase database) {
+        this.clientCollection = database.getCollection("clients", Client.class);
     }
 
-    public boolean insertClient(ClientSession session, Client client) {
-        try {
-            return clientCollection.insertOne(session, client).wasAcknowledged();
-        } catch (Exception e) {
-            throw e;
-        }
+    // Insert a new Client
+    public void insert(ClientSession session, Client client) {
+        clientCollection.insertOne(session, client);
     }
 
-    public boolean deleteClient(ClientSession session, Client client) {
-        try {
-            Bson filter = Filters.eq("id", client.getUuid());
-            return clientCollection.deleteOne(session, filter).wasAcknowledged();
-        } catch (Exception e) {
-            throw e;
-        }
+    // Find a Client by its UUID
+    public Client findById(ClientSession session, UUID id) {
+        Document filter = new Document("id", id.toString());
+        return clientCollection.find(session, filter).first();
     }
 
-    public Optional<Client> getClient(UUID id) {
-        try {
-            Bson filter = Filters.eq("id", id.toString());
-            return Optional.ofNullable(clientCollection.find(filter).first());
-        } catch (Exception e) {
-            throw e;
-        }
+    // Update a Client by its UUID
+    public void updateById(ClientSession session, Client updatedClient) {
+        Document filter = new Document("id", updatedClient.getId().toString());
+        clientCollection.replaceOne(session, filter, updatedClient);
     }
 
-    public boolean updateClient(ClientSession session, Client client) {
-        try {
-            Bson filter = Filters.eq("id", client.getUuid());
-            Bson update = Updates.combine(
-                    Updates.set("firstName", client.getFirstName()),
-                    Updates.set("lastName", client.getLastName()),
-                    Updates.set("phoneNumber", client.getPhoneNumber()),
-                    Updates.set("address", client.getAddress())
-            );
-            return clientCollection.updateOne(session, filter, update).wasAcknowledged();
-        } catch (Exception e) {
-            throw e;
-        }
+    // Delete a Client by its UUID
+    public void deleteById(ClientSession session, UUID id) {
+        Document filter = new Document("id", id.toString());
+        clientCollection.deleteOne(session, filter);
+    }
+
+    // Retrieve all clients
+    public List<Client> findAll(ClientSession session) {
+        return StreamSupport.stream(clientCollection.find(session).spliterator(), false)
+                .collect(Collectors.toList());
     }
 }

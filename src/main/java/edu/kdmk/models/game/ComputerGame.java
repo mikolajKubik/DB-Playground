@@ -1,36 +1,22 @@
 
 package edu.kdmk.models.game;
 
+import java.util.UUID;
 
-import lombok.*;
-import org.bson.codecs.pojo.annotations.BsonCreator;
-import org.bson.codecs.pojo.annotations.BsonProperty;
-
-@Data
-@Getter
-@Setter
-@ToString(callSuper = true)
-@NoArgsConstructor
-@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 public class ComputerGame extends Game {
+    private String platform;
 
-    @BsonProperty("platform")
-    private String platform; // e.g., "PC", "Console", "Mobile"
-
-    @BsonProperty("is_multiplayer")
-    private boolean isMultiplayer;
-
-    @BsonCreator
-    public ComputerGame(@BsonProperty("game_name") String gameName,
-                        @BsonProperty("recommended_age") int recommendedAge,
-                        @BsonProperty("release_year") int releaseYear,
-                        @BsonProperty("publisher") String publisher,
-                        @BsonProperty("price_per_day") int pricePerDay,
-                        @BsonProperty("platform") String platform,
-                        @BsonProperty("is_multiplayer") boolean isMultiplayer) {
-        super(gameName, recommendedAge, releaseYear, publisher, pricePerDay, GameType.COMPUTER_GAME);
+    public ComputerGame(UUID id, String name, String platform) {
+        super(id, name, GameType.COMPUTER_GAME);
         this.platform = platform;
-        this.isMultiplayer = isMultiplayer;
+    }
+
+    public ComputerGame(String name, String platform) {
+        super(name, GameType.COMPUTER_GAME); // UUID is auto-assigned
+        this.platform = platform;
+    }
+
+    public String getPlatform() {
+        return platform;
     }
 }
-

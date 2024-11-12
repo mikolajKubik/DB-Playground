@@ -8,6 +8,7 @@ import edu.kdmk.models.Client;
 import edu.kdmk.repositories.ClientRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class ClientManager {
@@ -20,15 +21,19 @@ public class ClientManager {
     }
 
     // Transactional insert for a new Client
-    public void insertClient(Client newClient) {
+    public Client insertClient(Client newClient) {
         try (ClientSession session = mongoClient.startSession()) {
-            session.withTransaction((TransactionBody<Void>) () -> {
-                clientRepository.insert(session, newClient);
+            return session.withTransaction(() -> {
+                //Optional<Client> retrievedClient = Optional.empty();
+                if (clientRepository.insert(session, newClient)) {
+                    return clientRepository.findById(session, newClient.getId());
+                }
                 return null;
             });
-        } catch (RuntimeException e) {
-            System.err.println("Transaction aborted due to an error: " + e.getMessage());
+        }  catch (Exception e) {
+            System.err.println(e.getMessage());
         }
+        return null;
     }
 
     // Transactional find by UUID

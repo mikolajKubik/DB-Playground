@@ -31,6 +31,9 @@ public class ClientCodec implements Codec<Client> {
                 case "address":
                     address = reader.readString();
                     break;
+                case "rentalCount":
+                    reader.readInt32(); // Ignore for now
+                    break;
                 default:
                     reader.skipValue();
             }
@@ -48,6 +51,7 @@ public class ClientCodec implements Codec<Client> {
         writer.writeString("id", value.getId().toString());
         writer.writeString("name", value.getName());
         writer.writeString("address", value.getAddress());
+        writer.writeInt32("rentalCount", value.getRentalCount());
 
         writer.writeEndDocument();
     }

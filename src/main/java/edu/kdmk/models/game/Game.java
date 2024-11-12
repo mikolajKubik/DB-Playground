@@ -7,6 +7,7 @@ import java.util.UUID;
 public abstract class Game extends AbstractEntity {
     private String name;
     private GameType type;
+    private int rentalStatusCount;
 
     public Game(UUID id, String name, GameType type) {
         super(id);
@@ -18,6 +19,14 @@ public abstract class Game extends AbstractEntity {
         super(); // UUID auto-assigned
         this.name = name;
         this.type = gameType;
+    }
+
+    public int getRentalStatusCount() {
+        return rentalStatusCount;
+    }
+
+    public void setRentalStatusCount(int rentalStatusCount) {
+        this.rentalStatusCount = rentalStatusCount;
     }
 
     public String getName() {

@@ -47,6 +47,9 @@ public class GameCodec implements Codec<Game> {
                 case "platform":
                     platform = reader.readString();
                     break;
+                case "rentalStatusCount":
+                    reader.readInt32(); // Ignore for now
+                    break;
                 default:
                     reader.skipValue();
             }
@@ -71,6 +74,7 @@ public class GameCodec implements Codec<Game> {
         writer.writeString("id", value.getId().toString());
         writer.writeString("name", value.getName());
         writer.writeString("gameType", value.getGameType().getTypeName()); // Serialize GameType
+        writer.writeInt32("rentalStatusCount", value.getRentalStatusCount());
 
         if (value instanceof BoardGame) {
             BoardGame boardGame = (BoardGame) value;

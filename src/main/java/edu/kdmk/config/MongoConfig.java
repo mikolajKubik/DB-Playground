@@ -166,6 +166,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import edu.kdmk.models.codec.ClientCodec;
 import edu.kdmk.models.codec.GameCodec;
+import edu.kdmk.models.codec.RentCodec;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 
@@ -184,7 +185,11 @@ public class MongoConfig implements AutoCloseable {
 
     public MongoConfig(String connectionString, String databaseName) {
         // Register custom codecs, e.g., GameCodec
-        CodecRegistry customCodecRegistry = CodecRegistries.fromCodecs(new GameCodec(), new ClientCodec());
+        // Instantiate individual codecs
+        ClientCodec clientCodec = new ClientCodec();
+        GameCodec gameCodec = new GameCodec();
+        RentCodec rentCodec = new RentCodec(clientCodec, gameCodec);
+        CodecRegistry customCodecRegistry = CodecRegistries.fromCodecs(clientCodec, gameCodec, rentCodec);
 
         CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
                 MongoClientSettings.getDefaultCodecRegistry(),

@@ -12,6 +12,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.inc;
+
 public class GameRepository {
     private final MongoCollection<Game> gameCollection;
 
@@ -46,5 +50,27 @@ public class GameRepository {
     public List<Game> findAll(ClientSession session) {
         return StreamSupport.stream(gameCollection.find(session).spliterator(), false)
                 .collect(Collectors.toList());
+    }
+
+    // Atomic increment to mark as rented
+    public boolean markAsRented(ClientSession session, UUID gameId) {
+        Bson filter = and(eq("id", gameId.toString()), eq("rentalStatusCount", 0)); // Ensure game is not rented
+        Bson update = inc("rentalStatusCount", 1); // Increment rental status count by 1
+
+        // Use Document as the return type to match the MongoDB expectations
+        Document updatedGame = gameCollection.withDocumentClass(Document.class)
+                .findOneAndUpdate(session, filter, update);
+        return updatedGame != null; // Returns true if update was successful, false if not
+    }
+
+    // Atomic decrement to unmark as rented
+    public boolean unmarkAsRented(ClientSession session, UUID gameId) {
+        Bson filter = and(eq("id", gameId.toString()), eq("rentalStatusCount", 1)); // Ensure game is rented by one renter
+        Bson update = inc("rentalStatusCount", -1); // Decrement rental status count by 1
+
+        // Use Document as the return type to match the MongoDB expectations
+        Document updatedGame = gameCollection.withDocumentClass(Document.class)
+                .findOneAndUpdate(session, filter, update);
+        return updatedGame != null; // Returns true if update was successful, false if not
     }
 }

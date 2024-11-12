@@ -6,6 +6,7 @@ import com.mongodb.client.model.ValidationOptions;
 import edu.kdmk.config.MongoConfig;
 import edu.kdmk.managers.ClientManager;
 import edu.kdmk.managers.GameManager;
+import edu.kdmk.managers.RentManager;
 import edu.kdmk.models.Client;
 import edu.kdmk.models.game.BoardGame;
 import edu.kdmk.models.game.ComputerGame;
@@ -13,6 +14,7 @@ import edu.kdmk.models.game.Game;
 import edu.kdmk.repositories.GameRepository;
 import org.bson.Document;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,7 +38,7 @@ public class Main {
             // Find the game by ID
             Game foundGame = gameManager.findGameById(newGame.getId());
             if (foundGame != null) {
-                System.out.println("Game found: " + foundGame.getName());
+                System.out.println("AAAAAAAAAAAAAAAAAAAAAAAGame found: " + foundGame.getName());
             }
 
             // Update the game by modifying its attributes and calling updateGameById
@@ -78,6 +80,27 @@ public class Main {
             //clientManager.deleteClientById(newClient.getId());
 
             /////////////////////////////////////////////
+
+
+            RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
+
+            // Create a new Client
+            Client client = new Client("CWEL John Doe", "123 Main St");
+            System.out.println("Client created: " + client.getName());
+            clientManager.insertClient(client);
+
+            // Create a new Game
+            Game game = new BoardGame("CWEL Monopoly", 2, 6);
+            System.out.println("Game created: " + game.getName());
+            gameManager.insertGame(game);
+
+            // Create a single Rent
+            System.out.println("Creating a single rent...");
+            rentManager.createRent(client, game, LocalDate.now(), LocalDate.now().plusDays(7));
+            System.out.println("Single rent created successfully.");
+
+
+            rentManager.createRent(newClient, game, LocalDate.now(), LocalDate.now().plusDays(7));
 
 
 

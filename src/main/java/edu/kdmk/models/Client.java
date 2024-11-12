@@ -5,6 +5,7 @@ import java.util.UUID;
 public class Client extends AbstractEntity {
     private String name;
     private String address;
+    private int rentalCount;
 
     // Constructor for a new Client with auto-assigned UUID
     public Client(String name, String address) {
@@ -18,6 +19,10 @@ public class Client extends AbstractEntity {
         super(id); // Use provided UUID
         this.name = name;
         this.address = address;
+    }
+
+    public int getRentalCount() {
+        return rentalCount;
     }
 
     public String getName() {

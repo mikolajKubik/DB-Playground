@@ -1,96 +1,71 @@
 package edu.kdmk.managers;
 
 import com.mongodb.client.ClientSession;
-import edu.kdmk.config.MongoDBConnection;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.TransactionBody;
 import edu.kdmk.models.Client;
 import edu.kdmk.repositories.ClientRepository;
-import lombok.AllArgsConstructor;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
-@AllArgsConstructor
 public class ClientManager {
-    private final MongoDBConnection mongoDBConnection;
+    private final MongoClient mongoClient;
     private final ClientRepository clientRepository;
 
-    public Optional<Client> addNewClient(Client client) {
-        var session = mongoDBConnection.startSession();
-        Optional<Client> result;
-        try {
-            session.startTransaction();
-
-            if (clientRepository.insertClient(session, client)) {
-                result = Optional.of(client);
-            } else {
-                result = Optional.empty();
-            }
-
-            session.commitTransaction();
-        } catch (Exception e) {
-            session.abortTransaction();
-            throw e;
-        } finally {
-            session.close();
-        }
-        return result;
+    public ClientManager(MongoClient mongoClient, MongoDatabase database) {
+        this.mongoClient = mongoClient;
+        this.clientRepository = new ClientRepository(database);
     }
 
-    public boolean removeClient(Client client) {
-        var session = mongoDBConnection.startSession();
-        boolean result;
-        try {
-            session.startTransaction();
-
-            result = clientRepository.deleteClient(session, client);
-
-            session.commitTransaction();
-        } catch (Exception e) {
-            session.abortTransaction();
-            throw e;
-        } finally {
-            session.close();
+    // Transactional insert for a new Client
+    public void insertClient(Client newClient) {
+        try (ClientSession session = mongoClient.startSession()) {
+            session.withTransaction((TransactionBody<Void>) () -> {
+                clientRepository.insert(session, newClient);
+                return null;
+            });
+        } catch (RuntimeException e) {
+            System.err.println("Transaction aborted due to an error: " + e.getMessage());
         }
-        return result;
     }
 
-    public Optional<Client> getClientById(UUID id) {
-        var session = mongoDBConnection.startSession();
-        Optional<Client> result;
-        try {
-            session.startTransaction();
-
-            result = clientRepository.getClient(id);
-
-            session.commitTransaction();
-        } catch (Exception e) {
-            session.abortTransaction();
-            throw e;
-        } finally {
-            session.close();
+    // Transactional find by UUID
+    public Client findClientById(UUID id) {
+        try (ClientSession session = mongoClient.startSession()) {
+            return clientRepository.findById(session, id);
         }
-        return result;
     }
 
-    public Optional<Client> updateClient(Client client) {
-        var session = mongoDBConnection.startSession();
-        Optional<Client> result;
-        try {
-            session.startTransaction();
-
-            if (clientRepository.updateClient(session, client)) {
-                result = Optional.of(client);
-            } else {
-                result = Optional.empty();
-            }
-
-            session.commitTransaction();
-        } catch (Exception e) {
-            session.abortTransaction();
-            throw e;
-        } finally {
-            session.close();
+    // Transactional update of a Client, replacing the entire document
+    public void updateClientById(Client updatedClient) {
+        try (ClientSession session = mongoClient.startSession()) {
+            session.withTransaction((TransactionBody<Void>) () -> {
+                clientRepository.updateById(session, updatedClient);
+                return null;
+            });
+        } catch (RuntimeException e) {
+            System.err.println("Transaction aborted due to an error: " + e.getMessage());
         }
-        return result;
+    }
+
+    // Transactional deletion of a Client by UUID
+    public void deleteClientById(UUID clientId) {
+        try (ClientSession session = mongoClient.startSession()) {
+            session.withTransaction((TransactionBody<Void>) () -> {
+                clientRepository.deleteById(session, clientId);
+                return null;
+            });
+        } catch (RuntimeException e) {
+            System.err.println("Transaction aborted due to an error: " + e.getMessage());
+        }
+    }
+
+    // Transactional retrieval of all clients
+    public List<Client> getAllClients() {
+        try (ClientSession session = mongoClient.startSession()) {
+            return clientRepository.findAll(session);
+        }
     }
 }

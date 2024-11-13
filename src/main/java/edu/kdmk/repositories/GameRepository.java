@@ -3,6 +3,7 @@ package edu.kdmk.repositories;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import edu.kdmk.models.game.Game;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -52,14 +53,14 @@ public class GameRepository {
                 .collect(Collectors.toList());
     }
 
-    // Atomic increment to mark as rented
     public boolean markAsRented(ClientSession session, UUID gameId) {
         Bson filter = and(eq("id", gameId.toString()), eq("rentalStatusCount", 0)); // Ensure game is not rented
         Bson update = inc("rentalStatusCount", 1); // Increment rental status count by 1
-
         // Use Document as the return type to match the MongoDB expectations
         Document updatedGame = gameCollection.withDocumentClass(Document.class)
                 .findOneAndUpdate(session, filter, update);
+        System.out.println("Timestamp: " + java.time.LocalDateTime.now());
+
         return updatedGame != null; // Returns true if update was successful, false if not
     }
 
@@ -73,4 +74,5 @@ public class GameRepository {
                 .findOneAndUpdate(session, filter, update);
         return updatedGame != null; // Returns true if update was successful, false if not
     }
+
 }

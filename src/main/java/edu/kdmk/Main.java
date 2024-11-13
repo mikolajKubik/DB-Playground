@@ -103,6 +103,9 @@ public class Main {
             rentManager.createRent(newClient, game, LocalDate.now(), LocalDate.now().plusDays(7));
 
 
+            /////////////////////////////////////////////
+
+
 
         } catch (Exception e) {
             System.err.println("Error occurred: " + e.getMessage());

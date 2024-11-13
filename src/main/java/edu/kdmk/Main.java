@@ -55,21 +55,22 @@ public class Main {
 
             /////////////////////////////////////////////
 
-            ClientManager clientManager = new ClientManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
+            ClientManager clientManager = new ClientManager(mongoConfig.getDatabase());
 
             // Insert a new client
             Client newClient = new Client("John Doe", "123 Main St");
             clientManager.insertClient(newClient);
 
             // Find the client by ID
-            Client foundClient = clientManager.findClientById(newClient.getId());
-            if (foundClient != null) {
-                System.out.println("Client found: " + foundClient.getName());
+            Optional<Client> foundClient = clientManager.findClientById(newClient.getId());
+            if (foundClient.isPresent()) {
+                System.out.println("Client found: " + foundClient.get().getName());
+
+                // Update the client by modifying its attributes and calling updateClientById
+                foundClient.get().setAddress("45669696969 Elm St");
+                clientManager.updateClient(foundClient.get());
             }
 
-            // Update the client by modifying its attributes and calling updateClientById
-            foundClient.setAddress("45669696969 Elm St");
-            clientManager.updateClientById(foundClient);
 
             // Retrieve and display all clients
             List<Client> allClients = clientManager.getAllClients();

@@ -4,11 +4,11 @@ import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import edu.kdmk.models.Client;
-import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -23,40 +23,51 @@ public class ClientRepository {
         this.clientCollection = database.getCollection("clients", Client.class);
     }
 
-    // Insert a new Client
-    /*public void insert(ClientSession session, Client client) {
-        clientCollection.insertOne(session, client);
-    }*/
+    public boolean insert(Client client) {
+        return clientCollection.insertOne(client).wasAcknowledged();
+    }
+
     public boolean insert(ClientSession session, Client client) {
-        try {
-            return clientCollection.insertOne(session, client).wasAcknowledged();
-        } catch (Exception e) {
-            throw e;
-        }
+        return clientCollection.insertOne(session, client).wasAcknowledged();
+    }
+
+    public Optional<Client> findById(UUID id) {
+        Document filter = new Document("id", id.toString());
+        return Optional.ofNullable(clientCollection.find(filter).first());
     }
 
     // Find a Client by its UUID
-    public Client findById(ClientSession session, UUID id) {
+    public Optional<Client> findById(ClientSession session, UUID id) {
         Document filter = new Document("id", id.toString());
-        return clientCollection.find(session, filter).first();
+        return Optional.ofNullable(clientCollection.find(session, filter).first());
     }
 
+    public boolean update(Client updatedClient) {
+        Document filter = new Document("id", updatedClient.getId().toString());
+        return clientCollection.replaceOne(filter, updatedClient).wasAcknowledged();
+    }
 
     // Update a Client by its UUID
-    public void updateById(ClientSession session, Client updatedClient) {
+    public boolean update(ClientSession session, Client updatedClient) {
         Document filter = new Document("id", updatedClient.getId().toString());
-        clientCollection.replaceOne(session, filter, updatedClient);
+        return clientCollection.replaceOne(session, filter, updatedClient).wasAcknowledged();
     }
 
     // Delete a Client by its UUID
-    public void deleteById(ClientSession session, UUID id) {
+    public boolean deleteById(UUID id) {
         Document filter = new Document("id", id.toString());
-        clientCollection.deleteOne(session, filter);
+        return clientCollection.deleteOne(filter).wasAcknowledged();
+    }
+
+    // Delete a Client by its UUID
+    public boolean deleteById(ClientSession session, UUID id) {
+        Document filter = new Document("id", id.toString());
+        return clientCollection.deleteOne(session, filter).wasAcknowledged();
     }
 
     // Retrieve all clients
-    public List<Client> findAll(ClientSession session) {
-        return StreamSupport.stream(clientCollection.find(session).spliterator(), false)
+    public List<Client> findAll() {
+        return StreamSupport.stream(clientCollection.find().spliterator(), false)
                 .collect(Collectors.toList());
     }
 

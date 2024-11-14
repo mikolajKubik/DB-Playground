@@ -31,11 +31,12 @@ public class RentCodec implements Codec<Rent> {
         LocalDate endDate = null;
         Client client = null;
         Game game = null;
+        int rentalPrice = 0;
 
         while (reader.readBsonType() != org.bson.BsonType.END_OF_DOCUMENT) {
             String fieldName = reader.readName();
             switch (fieldName) {
-                case "id":
+                case "_id":
                     id = UUID.fromString(reader.readString());
                     break;
                 case "startDate":
@@ -50,6 +51,9 @@ public class RentCodec implements Codec<Rent> {
                 case "game":
                     game = gameCodec.decode(reader, decoderContext);      // Decode embedded Game
                     break;
+                case "rentalPrice":
+                    rentalPrice = reader.readInt32();
+                    break;
                 default:
                     reader.skipValue();
             }
@@ -57,14 +61,14 @@ public class RentCodec implements Codec<Rent> {
 
         reader.readEndDocument();
 
-        return new Rent(id, startDate, endDate, client, game);
+        return new Rent(id, startDate, endDate, client, game, rentalPrice);
     }
 
     @Override
     public void encode(BsonWriter writer, Rent value, EncoderContext encoderContext) {
         writer.writeStartDocument();
 
-        writer.writeString("id", value.getId().toString());
+        writer.writeString("_id", value.getId().toString());
         writer.writeString("startDate", value.getStartDate().toString());
         writer.writeString("endDate", value.getEndDate().toString());
 
@@ -74,6 +78,8 @@ public class RentCodec implements Codec<Rent> {
 
         writer.writeName("game");
         gameCodec.encode(writer, value.getGame(), encoderContext);
+
+        writer.writeInt32("rentalPrice", value.getRentalPrice());
 
         writer.writeEndDocument();
     }

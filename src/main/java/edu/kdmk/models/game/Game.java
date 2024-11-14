@@ -3,10 +3,11 @@ package edu.kdmk.models.game;
 import edu.kdmk.models.AbstractEntity;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.UUID;
 
-
+@ToString(callSuper = true)
 public abstract class Game extends AbstractEntity {
     @Getter @Setter
     private String name;
@@ -15,17 +16,23 @@ public abstract class Game extends AbstractEntity {
     private final GameType type;
 
     @Getter @Setter
+    private int pricePerDay;
+
+    @Getter @Setter
     private int rentalStatusCount;
 
-    public Game(UUID id, String name, GameType type) {
+    public Game(UUID id, String name, GameType type, int pricePerDay, int rentalStatusCount) {
         super(id);
         this.name = name;
         this.type = type;
+        this.pricePerDay = pricePerDay;
+        this.rentalStatusCount = rentalStatusCount;
     }
 
-    public Game(String name, GameType gameType) {
+    public Game(String name, GameType gameType, int pricePerDay) {
         super(); // UUID auto-assigned
         this.name = name;
         this.type = gameType;
+        this.pricePerDay = pricePerDay;
     }
 }

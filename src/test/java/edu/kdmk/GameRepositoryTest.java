@@ -29,8 +29,6 @@ public class GameRepositoryTest {
 
         // Initialize MongoConfig before all tests
         mongoConfig = new MongoConfig(connectionString, databaseName);
-
-        System.out.println("MongoDB connection setup before all Game repository tests");
     }
 
     @AfterAll
@@ -40,21 +38,19 @@ public class GameRepositoryTest {
             if (mongoConfig != null) {
                 mongoConfig.close();
             }
-            System.out.println("MongoDB connection closed after all Game repository tests");
         } catch (Exception e) {
-            System.out.println("Error closing MongoDB connection");
             e.printStackTrace();
         }
     }
 
     @BeforeEach
     void setupGames() {
-        boardGame = new BoardGame("Chinese board game",  2, 4);
-        computerGame = new ComputerGame("Cyberpunk 2077", "PC");
+        boardGame = new BoardGame("Chinese board game", 5, 2, 4);
+        computerGame = new ComputerGame("Cyberpunk 2077", 5, "PC");
     }
 
     @Test
-    void insertGame() {
+    void insertGameTest() {
         GameManager gameManager = new GameManager(mongoConfig.getDatabase());
 
         assertTrue(gameManager.insertGame(boardGame));
@@ -124,17 +120,19 @@ public class GameRepositoryTest {
         assertEquals(boardGame.getId().toString(), boardGameDocument.getString("_id").getValue());
         assertEquals(boardGame.getName(), boardGameDocument.getString("name").getValue());
         assertEquals(boardGame.getType().getTypeName(), boardGameDocument.getString("gameType").getValue());
+        assertEquals(boardGame.getPricePerDay(), boardGameDocument.getInt32("pricePerDay").getValue());
         assertEquals(boardGame.getMinPlayers(), boardGameDocument.getInt32("minPlayers").getValue());
         assertEquals(boardGame.getMaxPlayers(), boardGameDocument.getInt32("maxPlayers").getValue());
 
-        BsonDocument computerGamedocument = new BsonDocument();
-        writer = new BsonDocumentWriter(computerGamedocument);
+        BsonDocument computerGameDocument = new BsonDocument();
+        writer = new BsonDocumentWriter(computerGameDocument);
         codec.encode(writer, computerGame, EncoderContext.builder().build());
 
-        assertEquals(computerGame.getId().toString(), computerGamedocument.getString("_id").getValue());
-        assertEquals(computerGame.getName(), computerGamedocument.getString("name").getValue());
-        assertEquals(computerGame.getType().getTypeName(), computerGamedocument.getString("gameType").getValue());
-        assertEquals(computerGame.getPlatform(), computerGamedocument.getString("platform").getValue());
+        assertEquals(computerGame.getId().toString(), computerGameDocument.getString("_id").getValue());
+        assertEquals(computerGame.getName(), computerGameDocument.getString("name").getValue());
+        assertEquals(computerGame.getType().getTypeName(), computerGameDocument.getString("gameType").getValue());
+        assertEquals(computerGame.getPricePerDay(), computerGameDocument.getInt32("pricePerDay").getValue());
+        assertEquals(computerGame.getPlatform(), computerGameDocument.getString("platform").getValue());
 
     }
 
@@ -146,6 +144,7 @@ public class GameRepositoryTest {
                 .append("_id", new BsonString(boardGame.getId().toString()))
                 .append("name", new BsonString(boardGame.getName()))
                 .append("gameType", new BsonString(boardGame.getType().getTypeName()))
+                .append("pricePerDay", new BsonInt32(boardGame.getPricePerDay()))
                 .append("minPlayers", new BsonInt32(boardGame.getMinPlayers()))
                 .append("maxPlayers", new BsonInt32(boardGame.getMaxPlayers()));
 
@@ -163,6 +162,7 @@ public class GameRepositoryTest {
                 .append("_id", new BsonString(computerGame.getId().toString()))
                 .append("name", new BsonString(computerGame.getName()))
                 .append("gameType", new BsonString(computerGame.getType().getTypeName()))
+                .append("pricePerDay", new BsonInt32(computerGame.getPricePerDay()))
                 .append("platform", new BsonString(computerGame.getPlatform()));
 
         reader = new BsonDocumentReader(computerGameDocument);

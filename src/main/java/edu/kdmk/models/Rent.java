@@ -1,15 +1,27 @@
 package edu.kdmk.models;
 
 import edu.kdmk.models.game.Game;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
 public class Rent extends AbstractEntity {
+    @Getter @Setter
     private LocalDate startDate;
+
+    @Getter @Setter
     private LocalDate endDate;
-    private Client client;  // Embedded Client object
-    private Game game;      // Embedded Game object
+
+    @Getter @Setter
+    private Client client;
+
+    @Getter @Setter
+    private Game game;
+
+    @Getter @Setter
+    private int rentalPrice;
 
     // Constructor for new Rent with auto-assigned UUID
     public Rent(LocalDate startDate, LocalDate endDate, Client client, Game game) {
@@ -18,48 +30,17 @@ public class Rent extends AbstractEntity {
         this.endDate = endDate;
         this.client = client;
         this.game = game;
+        this.rentalPrice = 0;
     }
 
     // Optional constructor to specify UUID (e.g., when loading from DB)
-    public Rent(UUID id, LocalDate startDate, LocalDate endDate, Client client, Game game) {
+    public Rent(UUID id, LocalDate startDate, LocalDate endDate, Client client, Game game, int rentalPrice) {
         super(id); // Use provided UUID
         this.startDate = startDate;
         this.endDate = endDate;
         this.client = client;
         this.game = game;
-    }
-
-    // Getters and setters
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public Client getClient() {
-        return client;
-    }
-
-    public void setClient(Client client) {
-        this.client = client;
-    }
-
-    public Game getGame() {
-        return game;
-    }
-
-    public void setGame(Game game) {
-        this.game = game;
+        this.rentalPrice = rentalPrice;
     }
 
     @Override
@@ -70,6 +51,7 @@ public class Rent extends AbstractEntity {
                 ", endDate=" + endDate +
                 ", client=" + client +
                 ", game=" + game +
+                ", rentalPrice=" + rentalPrice +
                 '}';
     }
 }

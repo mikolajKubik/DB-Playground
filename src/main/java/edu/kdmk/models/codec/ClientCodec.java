@@ -19,6 +19,7 @@ public class ClientCodec implements Codec<Client> {
         String firstName = null;
         String address = null;
         String lastName = null;
+        int rentalCount = 0;
 
         while (reader.readBsonType() != org.bson.BsonType.END_OF_DOCUMENT) {
             String fieldName = reader.readName();
@@ -36,7 +37,7 @@ public class ClientCodec implements Codec<Client> {
                     address = reader.readString();
                     break;
                 case "rentalCount":
-                    reader.readInt32(); // Ignore for now
+                    rentalCount = reader.readInt32();
                     break;
                 default:
                     reader.skipValue();
@@ -45,7 +46,7 @@ public class ClientCodec implements Codec<Client> {
 
         reader.readEndDocument();
 
-        return new Client(id, firstName, lastName, address); // Return a new Client with all fields
+        return new Client(id, firstName, lastName, address, rentalCount); // Return a new Client with all fields
     }
 
     @Override

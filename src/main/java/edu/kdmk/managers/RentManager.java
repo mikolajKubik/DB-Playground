@@ -13,9 +13,11 @@ import edu.kdmk.repositories.RentRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class RentManager {
+
     private final MongoClient mongoClient;
     private final RentRepository rentRepository;
     private final InactiveRentRepository inactiveRentRepository;
@@ -30,137 +32,115 @@ public class RentManager {
         this.inactiveRentRepository = new InactiveRentRepository(database);
     }
 
+
     // Method to create a new Rent, mark Client and Game as rented
-    public void createRent(Client client, Game game, LocalDate startDate, LocalDate endDate) {
+    public boolean createRent(Rent rent) {
+        if (rent.getClient() == null || rent.getGame() == null || rent.getStartDate() == null || rent.getEndDate() == null) {
+            throw new IllegalArgumentException("Client, Game, Start Date and End Date are required.");
+        }
+
+        if (!isStartDateBeforeEndDate(rent.getStartDate(), rent.getEndDate())) {
+            throw new IllegalArgumentException("Start Date must be before End Date.");
+        }
+
         try (ClientSession session = mongoClient.startSession()) {
             session.startTransaction();
 
-            boolean markedAsRentedGame = gameRepository.markAsRented(session, game.getId());
-            boolean markedAsRentedClient = clientRepository.markAsRented(session, client.getId());
+            boolean markedAsRentedGame = gameRepository.markAsRented(session, rent.getGame().getId());
+            boolean markedAsRentedClient = clientRepository.markAsRented(session, rent.getClient().getId());
 
             if (!markedAsRentedGame) {
-                System.out.println("Game is already rented. Cannot create rent.");
                 session.abortTransaction();
-                return;
+                throw new IllegalStateException("Game is not available for rent.");
             }
 
             if (!markedAsRentedClient) {
-                System.out.println("Client has reached the maximum rental limit. Cannot create rent.");
                 session.abortTransaction();
-                return;
+                throw new IllegalStateException("Client is not available for rent.");
             }
 
-            Client newClient = clientRepository.findById(session, client.getId()).get();
-            Game newGame = gameRepository.findById(session, game.getId());
-
-
-            // Create Rent object
-            Rent rent = new Rent(startDate, endDate, newClient, newGame);
+            rent.setRentalPrice(calculateRentPrice(rent.getStartDate(), rent.getEndDate(), rent.getGame().getPricePerDay()));
 
             // Insert Rent into the repository
-            rentRepository.insert(session, rent);
-
-            // Mark Client and Game as rented
-
-
-            session.commitTransaction();
-            System.out.println("Rent created successfully and objects marked as rented.");
+            if (rentRepository.insert(session, rent)) {
+                session.commitTransaction();
+                return true;
+            }
+            session.abortTransaction();
         } catch (Exception e) {
-            System.err.println("Failed to create rent: " + e.getMessage());
+            throw e;
         }
+        return false;
     }
 
-    public Rent findRentById(UUID id) {
-        try (ClientSession session = mongoClient.startSession()) {
-            return rentRepository.findById(session, id);
+    public Optional<Rent> findRentById(UUID id) {
+        try {
+            return rentRepository.findById(id);
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     public List<Rent> getAllRents() {
-        try (ClientSession session = mongoClient.startSession()) {
-            session.startTransaction();
-
-            List<Rent> rents = rentRepository.findAll(session);
-
-            session.commitTransaction();
-            return rents;
+        try {
+            return rentRepository.findAll();
         } catch (Exception e) {
-            System.err.println("Failed to retrieve rents: " + e.getMessage());
-            return null;
+            throw e;
         }
     }
 
-
-
-    public void completeRent(UUID rentId) {
+    public boolean completeRent(UUID rentId) {
         try (ClientSession session = mongoClient.startSession()) {
             session.startTransaction();
 
-            // Find the rent in the active rents collection
-            Rent rent = rentRepository.findById(session, rentId);
-            if (rent != null) {
-                // Remove from active rent and add to inactive rent
-                rentRepository.deleteById(session, rentId);
-                inactiveRentRepository.insert(session, rent);
+            Optional<Rent> rent = rentRepository.findById(session, rentId);
+            if (rent.isPresent()) {
+                boolean markedAsReturnedGame = gameRepository.unmarkAsRented(session, rent.get().getGame().getId());
+                boolean markedAsReturnedClient = clientRepository.unmarkAsRented(session, rent.get().getClient().getId());
 
-                // Unmark Client and Game as available
-                gameRepository.unmarkAsRented(session, rent.getGame().getId());
-                clientRepository.unmarkAsRented(session, rent.getClient().getId());
+                if (!markedAsReturnedGame) {
+                    session.abortTransaction();
+                    throw new IllegalStateException("Game is not available for return.");
+                }
+
+                if (!markedAsReturnedClient) {
+                    session.abortTransaction();
+                    throw new IllegalStateException("Client is not available for return.");
+                }
+
+                rent.get().setEndDate(LocalDate.now());
+                rent.get().setRentalPrice(calculateRentPrice(rent.get().getStartDate(), rent.get().getEndDate(), rent.get().getGame().getPricePerDay()));
+                if (inactiveRentRepository.insert(session, rent.get()) && rentRepository.deleteById(session, rentId)) {
+                    session.commitTransaction();
+                    return true;
+                }
             }
-
-            session.commitTransaction();
-            System.out.println("Rent completed and moved to inactiveRents.");
+            session.abortTransaction();
         } catch (Exception e) {
-            System.err.println("Failed to complete rent: " + e.getMessage());
+            throw e;
+        }
+        return false;
+    }
+
+    public boolean updateRentalEndDate(UUID rentId, LocalDate newEndDate) {
+        try {
+            Optional<Rent> rent = rentRepository.findById(rentId);
+            if (rent.isPresent() && isStartDateBeforeEndDate(rent.get().getStartDate(), newEndDate)) {
+                rent.get().setEndDate(newEndDate);
+                rent.get().setRentalPrice(calculateRentPrice(rent.get().getStartDate(), newEndDate, rent.get().getGame().getPricePerDay()));
+                return rentRepository.update(rent.get());
+            }
+            return false;
+        } catch (Exception e) {
+            throw e;
         }
     }
 
-    public void updateRent(Rent rent) {
-        try (ClientSession session = mongoClient.startSession()) {
-            session.startTransaction();
-
-            rentRepository.updateById(session, rent);
-
-            session.commitTransaction();
-            System.out.println("Rent updated successfully.");
-        } catch (Exception e) {
-            System.err.println("Failed to update rent: " + e.getMessage());
-        }
+    private boolean isStartDateBeforeEndDate(LocalDate startDate, LocalDate endDate) {
+        return startDate.isBefore(endDate);
     }
 
-
-
-    // Method to delete a Rent, unmark Client and Game as rented
-//    public void deleteRent(UUID rentId) {
-//        try (ClientSession session = mongoClient.startSession()) {
-//            session.startTransaction();
-//
-//            // Find Rent by ID
-//            Rent rent = rentRepository.findById(session, rentId);
-//            if (rent == null) {
-//                System.out.println("Rent not found, cannot delete.");
-//                return;
-//            }
-//
-//            // Delete Rent from the repository
-//            rentRepository.deleteById(session, rentId);
-//
-//            // Unmark Client and Game as rented
-//            boolean unmarkedAsRentedGame = gameRepository.unmarkAsRented(session, rent.getGame().getId());
-//            boolean unmarkedAsRentedClient = clientRepository.unmarkAsRented(session, rent.getClient().getId());
-//
-//            if (!unmarkedAsRentedGame) {
-//                System.out.println("Game was not marked as rented. Possible inconsistency.");
-//            }
-//
-//            if (!unmarkedAsRentedClient) {
-//                System.out.println("Client was not marked as rented. Possible inconsistency.");
-//            }
-//
-//            session.commitTransaction();
-//            System.out.println("Rent deleted successfully and objects unmarked as rented.");
-//        } catch (Exception e) {
-//            System.err.println("Failed to delete rent: " + e.getMessage());
-//        }
-//    }
+    private int calculateRentPrice(LocalDate startDate, LocalDate endDate, int pricePerDay) {
+        return pricePerDay * startDate.until(endDate).getDays() + pricePerDay;
+    }
 }

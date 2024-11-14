@@ -30,8 +30,8 @@ public class GameRepository {
         return gameCollection.insertOne(game).wasAcknowledged();
     }
 
-    public void insert(ClientSession session, Game game) {
-        gameCollection.insertOne(session, game);
+    public boolean insert(ClientSession session, Game game) {
+        return gameCollection.insertOne(session, game).wasAcknowledged();
     }
 
     public Optional<Game> findById(UUID id) {
@@ -40,9 +40,9 @@ public class GameRepository {
     }
 
     // Find a Game by its UUID
-    public Game findById(ClientSession session, UUID id) {
+    public Optional<Game> findById(ClientSession session, UUID id) {
         Document filter = new Document("_id", id.toString());
-        return gameCollection.find(session, filter).first();
+        return Optional.ofNullable(gameCollection.find(session, filter).first());
     }
 
     // Update a Game by its UUID, using the UUID from the Game object
@@ -52,9 +52,9 @@ public class GameRepository {
     }
 
     // Update a Game by its UUID, using the UUID from the Game object
-    public void updateById(ClientSession session, Game updatedGame) {
+    public boolean updateById(ClientSession session, Game updatedGame) {
         Document filter = new Document("_id", updatedGame.getId().toString());
-        gameCollection.replaceOne(session, filter, updatedGame);
+        return gameCollection.replaceOne(session, filter, updatedGame).wasAcknowledged();
     }
 
     // Delete a Game by its UUID
@@ -64,9 +64,9 @@ public class GameRepository {
     }
 
     // Delete a Game by its UUID
-    public void deleteById(ClientSession session, UUID id) {
+    public boolean deleteById(ClientSession session, UUID id) {
         Document filter = new Document("_id", id.toString());
-        gameCollection.deleteOne(session, filter);
+        return gameCollection.deleteOne(session, filter).wasAcknowledged();
     }
 
     public List<Game> findAll() {

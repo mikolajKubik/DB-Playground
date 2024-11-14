@@ -8,6 +8,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -23,46 +24,40 @@ public class RentRepository {
     }
 
     // Insert a new Rent
-    public void insert(ClientSession session, Rent rent) {
-        rentCollection.insertOne(session, rent);
+    public boolean insert(ClientSession session, Rent rent) {
+        return rentCollection.insertOne(session, rent).wasAcknowledged();
+    }
+
+    public Optional<Rent> findById(UUID id) {
+        Document filter = new Document("_id", id.toString());
+        return Optional.ofNullable(rentCollection.find(filter).first());
     }
 
     // Find a Rent by its UUID
-//    public Rent findById(ClientSession session, UUID id) {
-//        Document filter = new Document("id", id.toString());
-//        return rentCollection.find(session, filter).first();
-//    }
-
-    public Rent findById(ClientSession session, UUID id) {
-        return rentCollection.find(session, eq("id", id.toString())).first();
+    public Optional<Rent> findById(ClientSession session, UUID id) {
+        Document filter = new Document("_id", id.toString());
+        return Optional.ofNullable(rentCollection.find(session, filter).first());
     }
 
-    // Update a Rent by its UUID, replacing the entire document
-//    public void updateById(ClientSession session, Rent updatedRent) {
-//        Document filter = new Document("id", updatedRent.getId().toString());
-//        rentCollection.replaceOne(session, filter, updatedRent);
-//    }
+    public boolean update(Rent updatedRent) {
+        Bson filter = eq("_id", updatedRent.getId().toString());
+        return rentCollection.replaceOne(filter, updatedRent).wasAcknowledged();
+    }
 
-    // Delete a Rent by its UUID
-//    public void deleteById(ClientSession session, UUID id) {
-//        Document filter = new Document("id", id.toString());
-//        rentCollection.deleteOne(session, filter);
-//    }
-
-    public void updateById(ClientSession session, Rent updatedRent) {
-        Bson filter = eq("id", updatedRent.getId().toString());
-        rentCollection.replaceOne(session, filter, updatedRent);
+    public boolean updateById(ClientSession session, Rent updatedRent) {
+        Bson filter = eq("_id", updatedRent.getId().toString());
+        return rentCollection.replaceOne(session, filter, updatedRent).wasAcknowledged();
     }
 
     // Delete a Rent by its UUID
-    public void deleteById(ClientSession session, UUID id) {
-        Bson filter = eq("id", id.toString());
-        rentCollection.deleteOne(session, filter);
+    public boolean deleteById(ClientSession session, UUID id) {
+        Bson filter = eq("_id", id.toString());
+        return rentCollection.deleteOne(filter).wasAcknowledged();
     }
 
     // Retrieve all rents
-    public List<Rent> findAll(ClientSession session) {
-        return StreamSupport.stream(rentCollection.find(session).spliterator(), false)
+    public List<Rent> findAll() {
+        return StreamSupport.stream(rentCollection.find().spliterator(), false)
                 .collect(Collectors.toList());
     }
 }

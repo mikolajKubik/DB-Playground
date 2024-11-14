@@ -22,9 +22,11 @@ public class GameCodec implements Codec<Game> {
         UUID id = null;
         String name = null;
         GameType gameType = null;
+        int pricePerDay = 0;
         int minPlayers = 0;
         int maxPlayers = 0;
         String platform = null;
+        int rentalStatusCount = 0;
 
         while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
             String fieldName = reader.readName();
@@ -38,6 +40,9 @@ public class GameCodec implements Codec<Game> {
                 case "gameType":
                     gameType = GameType.fromString(reader.readString());
                     break;
+                case "pricePerDay":
+                    pricePerDay = reader.readInt32(); // Ignore for now
+                    break;
                 case "minPlayers":
                     minPlayers = reader.readInt32();
                     break;
@@ -48,7 +53,7 @@ public class GameCodec implements Codec<Game> {
                     platform = reader.readString();
                     break;
                 case "rentalStatusCount":
-                    reader.readInt32(); // Ignore for now
+                    rentalStatusCount = reader.readInt32(); // Ignore for now
                     break;
                 default:
                     reader.skipValue();
@@ -59,9 +64,9 @@ public class GameCodec implements Codec<Game> {
 
         // Use gameType to determine which subclass to return
         if (gameType == GameType.BOARD_GAME) {
-            return new BoardGame(id, name, minPlayers, maxPlayers);
+            return new BoardGame(id, name, pricePerDay, rentalStatusCount, minPlayers, maxPlayers);
         } else if (gameType == GameType.COMPUTER_GAME) {
-            return new ComputerGame(id, name, platform);
+            return new ComputerGame(id, name, pricePerDay, rentalStatusCount, platform);
         } else {
             throw new IllegalArgumentException("Unknown GameType: " + gameType);
         }
@@ -74,6 +79,7 @@ public class GameCodec implements Codec<Game> {
         writer.writeString("_id", value.getId().toString());
         writer.writeString("name", value.getName());
         writer.writeString("gameType", value.getType().getTypeName()); // Serialize GameType
+        writer.writeInt32("pricePerDay", value.getPricePerDay());
         writer.writeInt32("rentalStatusCount", value.getRentalStatusCount());
 
         if (value instanceof BoardGame boardGame) {
@@ -83,8 +89,6 @@ public class GameCodec implements Codec<Game> {
             writer.writeString("platform", computerGame.getPlatform());
 
         }
-
-
         writer.writeEndDocument();
     }
 

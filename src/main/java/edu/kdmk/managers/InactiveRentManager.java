@@ -8,51 +8,44 @@ import edu.kdmk.models.Rent;
 import edu.kdmk.repositories.InactiveRentRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class InactiveRentManager {
-    private final MongoClient mongoClient;
     private final InactiveRentRepository inactiveRentRepository;
 
-    public InactiveRentManager(MongoClient mongoClient, MongoDatabase database) {
-        this.mongoClient = mongoClient;
+    public InactiveRentManager(MongoDatabase database) {
         this.inactiveRentRepository = new InactiveRentRepository(database);
     }
 
+    public boolean createInactiveRent(Rent rent) {
+        return inactiveRentRepository.insert(rent);
+    }
+
     // Find an inactive Rent by UUID
-    public Rent findInactiveRentById(UUID id) {
-        try (ClientSession session = mongoClient.startSession()) {
-            return inactiveRentRepository.findById(session, id);
+    public Optional<Rent> findInactiveRentById(UUID id) {
+        try {
+            return inactiveRentRepository.findById(id);
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     // Retrieve all inactive rents
     public List<Rent> getAllInactiveRents() {
-        try (ClientSession session = mongoClient.startSession()) {
-            session.startTransaction();
-
-            List<Rent> rents = inactiveRentRepository.findAll(session);
-
-            session.commitTransaction();
-            return rents;
+        try {
+            return inactiveRentRepository.findAll();
         } catch (Exception e) {
-            System.err.println("Failed to retrieve inactive rents: " + e.getMessage());
-            return null;
+            throw e;
         }
     }
 
     // Delete an inactive Rent
     public void deleteInactiveRent(Rent rent) {
-        try (ClientSession session = mongoClient.startSession()) {
-            session.startTransaction();
-
-            inactiveRentRepository.deleteById(session, rent.getId());
-
-            session.commitTransaction();
-            System.out.println("Inactive rent deleted successfully.");
+        try {
+            inactiveRentRepository.deleteById(rent.getId());
         } catch (Exception e) {
-            System.err.println("Failed to delete inactive rent: " + e.getMessage());
+            throw e;
         }
-    }// Method to create a new Rent, mark Client and Game as rented
-
+    }
 }

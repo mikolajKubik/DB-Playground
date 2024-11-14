@@ -29,10 +29,11 @@ public class Client extends AbstractEntity {
     }
 
     // Optional constructor for specifying UUID (e.g., when loading from DB)
-    public Client(UUID id, String name, String lastName, String address) {
+    public Client(UUID id, String name, String lastName, String address, int rentalCount) {
         super(id); // Use provided UUID
         this.firstName = name;
         this.lastName = lastName;
         this.address = address;
+        this.rentalCount = rentalCount;
     }
 }

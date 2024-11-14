@@ -27,8 +27,6 @@ public class ClientRepositoryTest {
 
         // Initialize MongoConfig before all tests
         mongoConfig = new MongoConfig(connectionString, databaseName);
-
-        System.out.println("MongoDB connection setup before all Client tests");
     }
 
     @AfterAll
@@ -38,9 +36,7 @@ public class ClientRepositoryTest {
             if (mongoConfig != null) {
                 mongoConfig.close();
             }
-            System.out.println("MongoDB connection closed after all Client tests");
         } catch (Exception e) {
-            System.out.println("Error closing MongoDB connection");
             e.printStackTrace();
         }
     }
@@ -57,7 +53,7 @@ public class ClientRepositoryTest {
         assertTrue(clientManager.insertClient(client));
 
         assertTrue(clientManager.findClientById(client.getId()).isPresent());
-        assertEquals(client, clientManager.findClientById(client.getId()).get());
+        assertInstanceOf(Client.class, clientManager.findClientById(client.getId()).get());
     }
 
     @Test

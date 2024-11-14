@@ -2,9 +2,14 @@ package edu.kdmk;
 
 import edu.kdmk.config.MongoConfig;
 import edu.kdmk.managers.GameManager;
+import edu.kdmk.models.codec.GameCodec;
 import edu.kdmk.models.game.BoardGame;
 import edu.kdmk.models.game.ComputerGame;
 import edu.kdmk.models.game.Game;
+import edu.kdmk.models.game.GameType;
+import org.bson.*;
+import org.bson.codecs.DecoderContext;
+import org.bson.codecs.EncoderContext;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -106,5 +111,66 @@ public class GameRepositoryTest {
         assertTrue(gameManager.findGameById(computerGame.getId()).isPresent());
         assertEquals(computerGame.getName(), gameManager.findGameById(computerGame.getId()).get().getName());
         assertInstanceOf(ComputerGame.class, gameManager.findGameById(computerGame.getId()).get());
+    }
+
+    @Test
+    void encodeTest() {
+        GameCodec codec = new GameCodec();
+
+        BsonDocument boardGameDocument = new BsonDocument();
+        BsonWriter writer = new BsonDocumentWriter(boardGameDocument);
+        codec.encode(writer, boardGame, EncoderContext.builder().build());
+
+        assertEquals(boardGame.getId().toString(), boardGameDocument.getString("_id").getValue());
+        assertEquals(boardGame.getName(), boardGameDocument.getString("name").getValue());
+        assertEquals(boardGame.getType().getTypeName(), boardGameDocument.getString("gameType").getValue());
+        assertEquals(boardGame.getMinPlayers(), boardGameDocument.getInt32("minPlayers").getValue());
+        assertEquals(boardGame.getMaxPlayers(), boardGameDocument.getInt32("maxPlayers").getValue());
+
+        BsonDocument computerGamedocument = new BsonDocument();
+        writer = new BsonDocumentWriter(computerGamedocument);
+        codec.encode(writer, computerGame, EncoderContext.builder().build());
+
+        assertEquals(computerGame.getId().toString(), computerGamedocument.getString("_id").getValue());
+        assertEquals(computerGame.getName(), computerGamedocument.getString("name").getValue());
+        assertEquals(computerGame.getType().getTypeName(), computerGamedocument.getString("gameType").getValue());
+        assertEquals(computerGame.getPlatform(), computerGamedocument.getString("platform").getValue());
+
+    }
+
+    @Test
+    void decodeTest() {
+        GameCodec codec = new GameCodec();
+
+        BsonDocument boardGameDocument = new BsonDocument()
+                .append("_id", new BsonString(boardGame.getId().toString()))
+                .append("name", new BsonString(boardGame.getName()))
+                .append("gameType", new BsonString(boardGame.getType().getTypeName()))
+                .append("minPlayers", new BsonInt32(boardGame.getMinPlayers()))
+                .append("maxPlayers", new BsonInt32(boardGame.getMaxPlayers()));
+
+        BsonReader reader = new BsonDocumentReader(boardGameDocument);
+        BoardGame decodedBoardGame = (BoardGame) codec.decode(reader, DecoderContext.builder().build());
+
+        assertEquals(boardGame.getId(), decodedBoardGame.getId());
+        assertEquals(boardGame.getName(), decodedBoardGame.getName());
+        assertEquals(boardGame.getType(), decodedBoardGame.getType());
+        assertEquals(boardGame.getMinPlayers(), decodedBoardGame.getMinPlayers());
+        assertEquals(boardGame.getMaxPlayers(), decodedBoardGame.getMaxPlayers());
+
+
+        BsonDocument computerGameDocument = new BsonDocument()
+                .append("_id", new BsonString(computerGame.getId().toString()))
+                .append("name", new BsonString(computerGame.getName()))
+                .append("gameType", new BsonString(computerGame.getType().getTypeName()))
+                .append("platform", new BsonString(computerGame.getPlatform()));
+
+        reader = new BsonDocumentReader(computerGameDocument);
+        ComputerGame decodedComputerGame = (ComputerGame) codec.decode(reader, DecoderContext.builder().build());
+
+        assertEquals(computerGame.getId(), decodedComputerGame.getId());
+        assertEquals(computerGame.getName(), decodedComputerGame.getName());
+        assertEquals(computerGame.getType(), decodedComputerGame.getType());
+        assertEquals(computerGame.getPlatform(), decodedComputerGame.getPlatform());
     }
 }

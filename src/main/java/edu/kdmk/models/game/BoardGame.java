@@ -4,9 +4,12 @@ import lombok.Getter;
 
 import java.util.UUID;
 
-@Getter
+
 public class BoardGame extends Game {
+    @Getter
     private final int minPlayers;
+
+    @Getter
     private final int maxPlayers;
 
     public BoardGame(UUID id, String name, int minPlayers, int maxPlayers) {

@@ -5,9 +5,9 @@ import lombok.Getter;
 
 import java.util.UUID;
 
-@Getter
-public class ComputerGame extends Game {
 
+public class ComputerGame extends Game {
+    @Getter
     private final String platform;
 
     public ComputerGame(UUID id, String name, String platform) {

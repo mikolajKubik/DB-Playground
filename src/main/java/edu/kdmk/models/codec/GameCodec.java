@@ -81,7 +81,9 @@ public class GameCodec implements Codec<Game> {
             writer.writeInt32("maxPlayers", boardGame.getMaxPlayers());
         } else if (value instanceof ComputerGame computerGame) {
             writer.writeString("platform", computerGame.getPlatform());
+
         }
+
 
         writer.writeEndDocument();
     }

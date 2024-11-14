@@ -8,14 +8,17 @@ import edu.kdmk.models.Rent;
 import edu.kdmk.models.game.Game;
 import edu.kdmk.repositories.ClientRepository;
 import edu.kdmk.repositories.GameRepository;
+import edu.kdmk.repositories.InactiveRentRepository;
 import edu.kdmk.repositories.RentRepository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public class RentManager {
     private final MongoClient mongoClient;
     private final RentRepository rentRepository;
+    private final InactiveRentRepository inactiveRentRepository;
     private final GameRepository gameRepository;
     private final ClientRepository clientRepository;
 
@@ -24,6 +27,7 @@ public class RentManager {
         this.rentRepository = new RentRepository(database);
         this.gameRepository = new GameRepository(database);
         this.clientRepository = new ClientRepository(database);
+        this.inactiveRentRepository = new InactiveRentRepository(database);
     }
 
     // Method to create a new Rent, mark Client and Game as rented
@@ -66,37 +70,97 @@ public class RentManager {
         }
     }
 
-    // Method to delete a Rent, unmark Client and Game as rented
-    public void deleteRent(UUID rentId) {
+    public Rent findRentById(UUID id) {
+        try (ClientSession session = mongoClient.startSession()) {
+            return rentRepository.findById(session, id);
+        }
+    }
+
+    public List<Rent> getAllRents() {
         try (ClientSession session = mongoClient.startSession()) {
             session.startTransaction();
 
-            // Find Rent by ID
+            List<Rent> rents = rentRepository.findAll(session);
+
+            session.commitTransaction();
+            return rents;
+        } catch (Exception e) {
+            System.err.println("Failed to retrieve rents: " + e.getMessage());
+            return null;
+        }
+    }
+
+
+
+    public void completeRent(UUID rentId) {
+        try (ClientSession session = mongoClient.startSession()) {
+            session.startTransaction();
+
+            // Find the rent in the active rents collection
             Rent rent = rentRepository.findById(session, rentId);
-            if (rent == null) {
-                System.out.println("Rent not found, cannot delete.");
-                return;
-            }
+            if (rent != null) {
+                // Remove from active rent and add to inactive rent
+                rentRepository.deleteById(session, rentId);
+                inactiveRentRepository.insert(session, rent);
 
-            // Delete Rent from the repository
-            rentRepository.deleteById(session, rentId);
-
-            // Unmark Client and Game as rented
-            boolean unmarkedAsRentedGame = gameRepository.unmarkAsRented(session, rent.getGame().getId());
-            boolean unmarkedAsRentedClient = clientRepository.unmarkAsRented(session, rent.getClient().getId());
-
-            if (!unmarkedAsRentedGame) {
-                System.out.println("Game was not marked as rented. Possible inconsistency.");
-            }
-
-            if (!unmarkedAsRentedClient) {
-                System.out.println("Client was not marked as rented. Possible inconsistency.");
+                // Unmark Client and Game as available
+                gameRepository.unmarkAsRented(session, rent.getGame().getId());
+                clientRepository.unmarkAsRented(session, rent.getClient().getId());
             }
 
             session.commitTransaction();
-            System.out.println("Rent deleted successfully and objects unmarked as rented.");
+            System.out.println("Rent completed and moved to inactiveRents.");
         } catch (Exception e) {
-            System.err.println("Failed to delete rent: " + e.getMessage());
+            System.err.println("Failed to complete rent: " + e.getMessage());
         }
     }
+
+    public void updateRent(Rent rent) {
+        try (ClientSession session = mongoClient.startSession()) {
+            session.startTransaction();
+
+            rentRepository.updateById(session, rent);
+
+            session.commitTransaction();
+            System.out.println("Rent updated successfully.");
+        } catch (Exception e) {
+            System.err.println("Failed to update rent: " + e.getMessage());
+        }
+    }
+
+
+
+    // Method to delete a Rent, unmark Client and Game as rented
+//    public void deleteRent(UUID rentId) {
+//        try (ClientSession session = mongoClient.startSession()) {
+//            session.startTransaction();
+//
+//            // Find Rent by ID
+//            Rent rent = rentRepository.findById(session, rentId);
+//            if (rent == null) {
+//                System.out.println("Rent not found, cannot delete.");
+//                return;
+//            }
+//
+//            // Delete Rent from the repository
+//            rentRepository.deleteById(session, rentId);
+//
+//            // Unmark Client and Game as rented
+//            boolean unmarkedAsRentedGame = gameRepository.unmarkAsRented(session, rent.getGame().getId());
+//            boolean unmarkedAsRentedClient = clientRepository.unmarkAsRented(session, rent.getClient().getId());
+//
+//            if (!unmarkedAsRentedGame) {
+//                System.out.println("Game was not marked as rented. Possible inconsistency.");
+//            }
+//
+//            if (!unmarkedAsRentedClient) {
+//                System.out.println("Client was not marked as rented. Possible inconsistency.");
+//            }
+//
+//            session.commitTransaction();
+//            System.out.println("Rent deleted successfully and objects unmarked as rented.");
+//        } catch (Exception e) {
+//            System.err.println("Failed to delete rent: " + e.getMessage());
+//        }
+//    }
 }

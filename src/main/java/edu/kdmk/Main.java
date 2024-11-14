@@ -86,8 +86,8 @@ public class Main {
             RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
 
             // Create a new Client
-            Client client = new Client("CWEL John Doe", "123 Main St");
-            System.out.println("Client created: " + client.getName());
+            Client client = new Client("John", "Fah", "123 Main St");
+            System.out.println("Client created: " + client.getFirstName());
             clientManager.insertClient(client);
 
             // Create a new Game
@@ -105,9 +105,10 @@ public class Main {
 
 
             /////////////////////////////////////////////
+            //System.out.println(rentManager.findRentById(UUID.fromString("7fe77754-1489-45fe-884f-6afa312a7ca2")).getId());
+            //rentManager.completeRent(rentManager.findRentById(UUID.fromString("7fe77754-1489-45fe-884f-6afa312a7ca2")).getId());
 
-
-
+            System.out.println(rentManager.findRentById(UUID.fromString("d104b1c2-27b9-46d2-990f-27f74cc8a85f")).getClient().toString());
         } catch (Exception e) {
             System.err.println("Error occurred: " + e.getMessage());
         }

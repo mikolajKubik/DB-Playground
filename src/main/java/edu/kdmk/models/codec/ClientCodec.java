@@ -22,7 +22,7 @@ public class ClientCodec implements Codec<Client> {
         while (reader.readBsonType() != org.bson.BsonType.END_OF_DOCUMENT) {
             String fieldName = reader.readName();
             switch (fieldName) {
-                case "id":
+                case "_id":
                     id = UUID.fromString(reader.readString());
                     break;
                 case "name":

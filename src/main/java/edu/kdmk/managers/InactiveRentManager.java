@@ -10,11 +10,11 @@ import edu.kdmk.repositories.InactiveRentRepository;
 import java.util.List;
 import java.util.UUID;
 
-public class inActiveRentManager {
+public class InactiveRentManager {
     private final MongoClient mongoClient;
     private final InactiveRentRepository inactiveRentRepository;
 
-    public inActiveRentManager(MongoClient mongoClient, MongoDatabase database) {
+    public InactiveRentManager(MongoClient mongoClient, MongoDatabase database) {
         this.mongoClient = mongoClient;
         this.inactiveRentRepository = new InactiveRentRepository(database);
     }

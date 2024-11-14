@@ -1,43 +1,38 @@
 package edu.kdmk.models;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.util.UUID;
 
+@Getter @Setter
+@ToString(callSuper = true)
 public class Client extends AbstractEntity {
-    private String name;
+
+    private String firstName;
+
+    private String lastName;
+
     private String address;
+
+    @Setter(AccessLevel.NONE)
     private int rentalCount;
 
     // Constructor for a new Client with auto-assigned UUID
-    public Client(String name, String address) {
+    public Client(String firstName, String lastName, String address) {
         super(); // UUID is auto-assigned
-        this.name = name;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.address = address;
     }
 
     // Optional constructor for specifying UUID (e.g., when loading from DB)
-    public Client(UUID id, String name, String address) {
+    public Client(UUID id, String name, String lastName, String address) {
         super(id); // Use provided UUID
-        this.name = name;
-        this.address = address;
-    }
-
-    public int getRentalCount() {
-        return rentalCount;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setAddress(String address) {
+        this.firstName = name;
+        this.lastName = lastName;
         this.address = address;
     }
 }

@@ -1,10 +1,14 @@
 
 package edu.kdmk.models.game;
 
+import lombok.Getter;
+
 import java.util.UUID;
 
+@Getter
 public class ComputerGame extends Game {
-    private String platform;
+
+    private final String platform;
 
     public ComputerGame(UUID id, String name, String platform) {
         super(id, name, GameType.COMPUTER_GAME);
@@ -14,9 +18,5 @@ public class ComputerGame extends Game {
     public ComputerGame(String name, String platform) {
         super(name, GameType.COMPUTER_GAME); // UUID is auto-assigned
         this.platform = platform;
-    }
-
-    public String getPlatform() {
-        return platform;
     }
 }

@@ -29,7 +29,7 @@ public class GameCodec implements Codec<Game> {
         while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
             String fieldName = reader.readName();
             switch (fieldName) {
-                case "id":
+                case "_id":
                     id = UUID.fromString(reader.readString());
                     break;
                 case "name":
@@ -71,17 +71,15 @@ public class GameCodec implements Codec<Game> {
     public void encode(BsonWriter writer, Game value, EncoderContext encoderContext) {
         writer.writeStartDocument();
 
-        writer.writeString("id", value.getId().toString());
+        writer.writeString("_id", value.getId().toString());
         writer.writeString("name", value.getName());
-        writer.writeString("gameType", value.getGameType().getTypeName()); // Serialize GameType
+        writer.writeString("gameType", value.getType().getTypeName()); // Serialize GameType
         writer.writeInt32("rentalStatusCount", value.getRentalStatusCount());
 
-        if (value instanceof BoardGame) {
-            BoardGame boardGame = (BoardGame) value;
+        if (value instanceof BoardGame boardGame) {
             writer.writeInt32("minPlayers", boardGame.getMinPlayers());
             writer.writeInt32("maxPlayers", boardGame.getMaxPlayers());
-        } else if (value instanceof ComputerGame) {
-            ComputerGame computerGame = (ComputerGame) value;
+        } else if (value instanceof ComputerGame computerGame) {
             writer.writeString("platform", computerGame.getPlatform());
         }
 

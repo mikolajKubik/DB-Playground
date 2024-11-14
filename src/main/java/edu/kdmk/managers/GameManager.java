@@ -1,74 +1,62 @@
 package edu.kdmk.managers;
 
-
-import com.mongodb.client.ClientSession;
-import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.TransactionBody;
 import edu.kdmk.models.game.Game;
 import edu.kdmk.repositories.GameRepository;
-import org.bson.Document;
-import org.bson.conversions.Bson;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Optional;
 
 public class GameManager {
-    private final MongoClient mongoClient;
     private final GameRepository gameRepository;
 
-    public GameManager(MongoClient mongoClient, MongoDatabase database) {
-        this.mongoClient = mongoClient;
+    public GameManager(MongoDatabase database) {
         this.gameRepository = new GameRepository(database);
     }
 
     // Transactional insert for a new Game
-    public void insertGame(Game newGame) {
-        try (ClientSession session = mongoClient.startSession()) {
-            session.withTransaction((TransactionBody<Void>) () -> {
-                gameRepository.insert(session, newGame);
-                return null;
-            });
-        } catch (RuntimeException e) {
-            System.err.println("Transaction aborted due to an error: " + e.getMessage());
+    public boolean insertGame(Game newGame) {
+        try {
+           return gameRepository.insert(newGame);
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     // Transactional find by UUID
-    public Game findGameById(UUID id) {
-        try (ClientSession session = mongoClient.startSession()) {
-            return gameRepository.findById(session, id);
+    public Optional<Game> findGameById(UUID id) {
+        try {
+            return gameRepository.findById(id);
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     // Transactional update of a Game, relying on UUID within Game object
-    public void updateGameById(Game updatedGame) {
-        try (ClientSession session = mongoClient.startSession()) {
-            session.withTransaction((TransactionBody<Void>) () -> {
-                gameRepository.updateById(session, updatedGame);
-                return null;
-            });
+    public boolean updateGame(Game updatedGame) {
+        try {
+            return gameRepository.update(updatedGame);
         } catch (RuntimeException e) {
-            System.err.println("Transaction aborted due to an error: " + e.getMessage());
+            throw e;
         }
     }
 
     // Transactional deletion of a Game by UUID
-    public void deleteGameById(UUID gameId) {
-        try (ClientSession session = mongoClient.startSession()) {
-            session.withTransaction((TransactionBody<Void>) () -> {
-                gameRepository.deleteById(session, gameId);
-                return null;
-            });
+    public boolean deleteGameById(UUID gameId) {
+        try {
+            return gameRepository.deleteById(gameId);
         } catch (RuntimeException e) {
-            System.err.println("Transaction aborted due to an error: " + e.getMessage());
+            throw e;
         }
     }
 
     // Transactional retrieval of all games
     public List<Game> getAllGames() {
-        try (ClientSession session = mongoClient.startSession()) {
-            return gameRepository.findAll(session);
+        try {
+            return gameRepository.findAll();
+        } catch (Exception e) {
+            throw e;
         }
     }
 }

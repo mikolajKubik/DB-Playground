@@ -1,12 +1,8 @@
 package edu.kdmk.managers;
 
-import com.mongodb.client.ClientSession;
-import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.TransactionBody;
 import edu.kdmk.models.Client;
 import edu.kdmk.repositories.ClientRepository;
-import lombok.AllArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +15,6 @@ public class ClientManager {
         this.clientRepository = new ClientRepository(database);
     }
 
-    // Transactional insert for a new Client
     public boolean insertClient(Client newClient) {
         try {
             return clientRepository.insert(newClient);
@@ -28,7 +23,6 @@ public class ClientManager {
         }
     }
 
-    // Transactional find by UUID
     public Optional<Client> findClientById(UUID id) {
         try {
             return clientRepository.findById(id);
@@ -37,7 +31,6 @@ public class ClientManager {
         }
     }
 
-    // Transactional update of a Client, replacing the entire document
     public boolean updateClient(Client updatedClient) {
         try {
             return clientRepository.update(updatedClient);
@@ -46,7 +39,6 @@ public class ClientManager {
         }
     }
 
-    // Transactional deletion of a Client by UUID
     public boolean deleteClientById(UUID clientId) {
         try {
             return clientRepository.deleteById(clientId);
@@ -55,7 +47,6 @@ public class ClientManager {
         }
     }
 
-    // Transactional retrieval of all clients
     public List<Client> getAllClients() {
         try {
             return clientRepository.findAll();

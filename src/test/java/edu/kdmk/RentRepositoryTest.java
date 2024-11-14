@@ -51,7 +51,7 @@ public class RentRepositoryTest {
     @Test
     public void optimisticLockTestTwoRentsOneClient() {
 
-        GameManager gameManager = new GameManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
+        GameManager gameManager = new GameManager(mongoConfig.getDatabase());
 
         Game newGame = new BoardGame( "Uno", 2, 6);
         gameManager.insertGame(newGame);
@@ -59,9 +59,9 @@ public class RentRepositoryTest {
 
         ClientManager clientManager = new ClientManager(mongoConfig.getDatabase());
 
-        Client newClient = new Client("John WDoe", "123 Main St");
+        Client newClient = new Client("John", "WDoe", "123 Main St");
         clientManager.insertClient(newClient);
-        Client newClient2 = new Client("Jane WDoe", "123 Main St");
+        Client newClient2 = new Client("Jane", "WDoe", "123 Main St");
         clientManager.insertClient(newClient2);
 
 

@@ -50,7 +50,7 @@ public class RentManager {
                 return;
             }
 
-            Client newClient = clientRepository.findById(session, client.getId());
+            Client newClient = clientRepository.findById(session, client.getId()).get();
             Game newGame = gameRepository.findById(session, game.getId());
 
 

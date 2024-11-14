@@ -1,10 +1,13 @@
 package edu.kdmk.models.game;
 
+import lombok.Getter;
+
 import java.util.UUID;
 
+@Getter
 public class BoardGame extends Game {
-    private int minPlayers;
-    private int maxPlayers;
+    private final int minPlayers;
+    private final int maxPlayers;
 
     public BoardGame(UUID id, String name, int minPlayers, int maxPlayers) {
         super(id, name, GameType.BOARD_GAME);
@@ -16,13 +19,5 @@ public class BoardGame extends Game {
         super(name, GameType.BOARD_GAME); // UUID is auto-assigned
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
-    }
-
-    public int getMinPlayers() {
-        return minPlayers;
-    }
-
-    public int getMaxPlayers() {
-        return maxPlayers;
     }
 }

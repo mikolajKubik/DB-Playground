@@ -1,12 +1,20 @@
 package edu.kdmk.models.game;
 
 import edu.kdmk.models.AbstractEntity;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
+
 public abstract class Game extends AbstractEntity {
+    @Getter @Setter
     private String name;
-    private GameType type;
+
+    @Getter
+    private final GameType type;
+
+    @Getter @Setter
     private int rentalStatusCount;
 
     public Game(UUID id, String name, GameType type) {
@@ -19,25 +27,5 @@ public abstract class Game extends AbstractEntity {
         super(); // UUID auto-assigned
         this.name = name;
         this.type = gameType;
-    }
-
-    public int getRentalStatusCount() {
-        return rentalStatusCount;
-    }
-
-    public void setRentalStatusCount(int rentalStatusCount) {
-        this.rentalStatusCount = rentalStatusCount;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public GameType getGameType() {
-        return type;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }

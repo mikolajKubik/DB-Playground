@@ -32,36 +32,36 @@ public class ClientRepository {
     }
 
     public Optional<Client> findById(UUID id) {
-        Document filter = new Document("id", id.toString());
+        Document filter = new Document("_id", id.toString());
         return Optional.ofNullable(clientCollection.find(filter).first());
     }
 
     // Find a Client by its UUID
     public Optional<Client> findById(ClientSession session, UUID id) {
-        Document filter = new Document("id", id.toString());
+        Document filter = new Document("_id", id.toString());
         return Optional.ofNullable(clientCollection.find(session, filter).first());
     }
 
     public boolean update(Client updatedClient) {
-        Document filter = new Document("id", updatedClient.getId().toString());
+        Document filter = new Document("_id", updatedClient.getId().toString());
         return clientCollection.replaceOne(filter, updatedClient).wasAcknowledged();
     }
 
     // Update a Client by its UUID
     public boolean update(ClientSession session, Client updatedClient) {
-        Document filter = new Document("id", updatedClient.getId().toString());
+        Document filter = new Document("_id", updatedClient.getId().toString());
         return clientCollection.replaceOne(session, filter, updatedClient).wasAcknowledged();
     }
 
     // Delete a Client by its UUID
     public boolean deleteById(UUID id) {
-        Document filter = new Document("id", id.toString());
+        Document filter = new Document("_id", id.toString());
         return clientCollection.deleteOne(filter).wasAcknowledged();
     }
 
     // Delete a Client by its UUID
     public boolean deleteById(ClientSession session, UUID id) {
-        Document filter = new Document("id", id.toString());
+        Document filter = new Document("_id", id.toString());
         return clientCollection.deleteOne(session, filter).wasAcknowledged();
     }
 
@@ -73,7 +73,7 @@ public class ClientRepository {
 
     // Atomic increment to mark a client as renting another item
     public boolean markAsRented(ClientSession session, UUID clientId) {
-        Bson filter = and(eq("id", clientId.toString()), lt("rentalCount", 5)); // Ensure rentalCount < 5
+        Bson filter = and(eq("_id", clientId.toString()), lt("rentalCount", 5)); // Ensure rentalCount < 5
         Bson update = inc("rentalCount", 1); // Increment rental count by 1
 
         // Use Document as the return type to match MongoDB expectations
@@ -84,7 +84,7 @@ public class ClientRepository {
 
     // Atomic decrement to unmark a client as renting an item
     public boolean unmarkAsRented(ClientSession session, UUID clientId) {
-        Bson filter = and(eq("id", clientId.toString()), gt("rentalCount", 0)); // Ensure rentalCount > 0
+        Bson filter = and(eq("_id", clientId.toString()), gt("rentalCount", 0)); // Ensure rentalCount > 0
         Bson update = inc("rentalCount", -1); // Decrement rental count by 1
 
         // Use Document as the return type to match MongoDB expectations

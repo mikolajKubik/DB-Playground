@@ -16,8 +16,9 @@ public class ClientCodec implements Codec<Client> {
         reader.readStartDocument();
 
         UUID id = null;
-        String name = null;
+        String firstName = null;
         String address = null;
+        String lastName = null;
 
         while (reader.readBsonType() != org.bson.BsonType.END_OF_DOCUMENT) {
             String fieldName = reader.readName();
@@ -25,8 +26,11 @@ public class ClientCodec implements Codec<Client> {
                 case "_id":
                     id = UUID.fromString(reader.readString());
                     break;
-                case "name":
-                    name = reader.readString();
+                case "firstName":
+                    firstName = reader.readString();
+                    break;
+                case "lastName":
+                    lastName = reader.readString();
                     break;
                 case "address":
                     address = reader.readString();
@@ -41,15 +45,16 @@ public class ClientCodec implements Codec<Client> {
 
         reader.readEndDocument();
 
-        return new Client(id, name, address); // Return a new Client with all fields
+        return new Client(id, firstName, lastName, address); // Return a new Client with all fields
     }
 
     @Override
     public void encode(BsonWriter writer, Client value, EncoderContext encoderContext) {
         writer.writeStartDocument();
 
-        writer.writeString("id", value.getId().toString());
-        writer.writeString("name", value.getName());
+        writer.writeString("_id", value.getId().toString());
+        writer.writeString("firstName", value.getFirstName());
+        writer.writeString("lastName", value.getLastName());
         writer.writeString("address", value.getAddress());
         writer.writeInt32("rentalCount", value.getRentalCount());
 

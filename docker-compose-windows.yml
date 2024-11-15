@@ -8,6 +8,9 @@
 #     127.0.0.1 mongo2
 #     127.0.0.1 mongo3
 #
+# mongosh 127.0.0.1:PORT -u root -p root --authenticationDatabase admin
+# rs.status()
+#
 # docker compose -f docker-compose-windows.yml up -d
 # docker compose -f docker-compose-windows.yml down -v
 networks:

@@ -3,6 +3,9 @@
 # !!! IMPORTANT !!!
 # MONGODB CLUSTER IS READY TO USE RIGHT AROUND 1 MINUTE AFTER START OF THE LAST NODE
 #
+# mongosh 127.0.0.1:PORT -u root -p root --authenticationDatabase admin
+# rs.status()
+#
 # docker compose -f docker-compose-macos.yml up -d
 # docker compose -f docker-compose-macos.yml down -v
 networks:

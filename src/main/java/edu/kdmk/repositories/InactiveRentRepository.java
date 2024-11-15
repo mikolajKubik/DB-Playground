@@ -19,7 +19,6 @@ public class InactiveRentRepository {
     private final MongoCollection<Rent> inactiveRentCollection;
 
     public InactiveRentRepository(MongoDatabase database) {
-        // Initialize the collection for Rent documents
         this.inactiveRentCollection = database.getCollection("inactiveRents", Rent.class);
     }
 
@@ -41,13 +40,11 @@ public class InactiveRentRepository {
         return Optional.ofNullable(inactiveRentCollection.find(session, filter).first());
     }
 
-    // Delete a Rent by its UUID
     public void deleteById(UUID id) {
         Bson filter = eq("_id", id.toString());
         inactiveRentCollection.deleteOne(filter);
     }
 
-    // Retrieve all rents
     public List<Rent> findAll() {
         return StreamSupport.stream(inactiveRentCollection.find().spliterator(), false)
                 .collect(Collectors.toList());

@@ -15,7 +15,6 @@ public class GameManager {
         this.gameRepository = new GameRepository(database);
     }
 
-    // Transactional insert for a new Game
     public boolean insertGame(Game newGame) {
         try {
            return gameRepository.insert(newGame);
@@ -24,7 +23,6 @@ public class GameManager {
         }
     }
 
-    // Transactional find by UUID
     public Optional<Game> findGameById(UUID id) {
         try {
             return gameRepository.findById(id);
@@ -33,7 +31,6 @@ public class GameManager {
         }
     }
 
-    // Transactional update of a Game, relying on UUID within Game object
     public boolean updateGame(Game updatedGame) {
         try {
             return gameRepository.update(updatedGame);
@@ -42,7 +39,6 @@ public class GameManager {
         }
     }
 
-    // Transactional deletion of a Game by UUID
     public boolean deleteGameById(UUID gameId) {
         try {
             return gameRepository.deleteById(gameId);
@@ -51,7 +47,6 @@ public class GameManager {
         }
     }
 
-    // Transactional retrieval of all games
     public List<Game> getAllGames() {
         try {
             return gameRepository.findAll();

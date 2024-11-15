@@ -1,6 +1,5 @@
 package edu.kdmk;
 
-import com.mongodb.client.MongoDatabase;
 import edu.kdmk.config.MongoConfig;
 import edu.kdmk.managers.ClientManager;
 import edu.kdmk.managers.GameManager;
@@ -244,5 +243,7 @@ public class RentRepositoryTest {
         } finally {
             executor.shutdown();
         }
+
+        assertTrue(exceptionCaught.get());
     }
 }

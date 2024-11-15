@@ -1,8 +1,5 @@
 package edu.kdmk.managers;
 
-import com.mongodb.client.ClientSession;
-
-import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import edu.kdmk.models.Rent;
 import edu.kdmk.repositories.InactiveRentRepository;
@@ -22,7 +19,6 @@ public class InactiveRentManager {
         return inactiveRentRepository.insert(rent);
     }
 
-    // Find an inactive Rent by UUID
     public Optional<Rent> findInactiveRentById(UUID id) {
         try {
             return inactiveRentRepository.findById(id);
@@ -31,7 +27,6 @@ public class InactiveRentManager {
         }
     }
 
-    // Retrieve all inactive rents
     public List<Rent> getAllInactiveRents() {
         try {
             return inactiveRentRepository.findAll();
@@ -40,7 +35,6 @@ public class InactiveRentManager {
         }
     }
 
-    // Delete an inactive Rent
     public void deleteInactiveRent(Rent rent) {
         try {
             inactiveRentRepository.deleteById(rent.getId());

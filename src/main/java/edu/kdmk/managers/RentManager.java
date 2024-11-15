@@ -3,9 +3,7 @@ package edu.kdmk.managers;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import edu.kdmk.models.Client;
 import edu.kdmk.models.Rent;
-import edu.kdmk.models.game.Game;
 import edu.kdmk.repositories.ClientRepository;
 import edu.kdmk.repositories.GameRepository;
 import edu.kdmk.repositories.InactiveRentRepository;
@@ -89,6 +87,7 @@ public class RentManager {
         }
     }
 
+    // Method to complete a Rent, mark Client and Game as returned
     public boolean completeRent(UUID rentId) {
         try (ClientSession session = mongoClient.startSession()) {
             session.startTransaction();

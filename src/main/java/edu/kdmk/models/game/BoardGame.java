@@ -20,7 +20,7 @@ public class BoardGame extends Game {
     }
 
     public BoardGame(String name, int pricePerDay, int minPlayers, int maxPlayers) {
-        super(name, GameType.BOARD_GAME, pricePerDay); // UUID is auto-assigned
+        super(name, GameType.BOARD_GAME, pricePerDay);
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
     }

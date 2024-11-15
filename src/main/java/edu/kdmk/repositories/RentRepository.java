@@ -19,11 +19,9 @@ public class RentRepository {
     private final MongoCollection<Rent> rentCollection;
 
     public RentRepository(MongoDatabase database) {
-        // Initialize the collection for Rent documents
         this.rentCollection = database.getCollection("rents", Rent.class);
     }
 
-    // Insert a new Rent
     public boolean insert(ClientSession session, Rent rent) {
         return rentCollection.insertOne(session, rent).wasAcknowledged();
     }
@@ -33,7 +31,6 @@ public class RentRepository {
         return Optional.ofNullable(rentCollection.find(filter).first());
     }
 
-    // Find a Rent by its UUID
     public Optional<Rent> findById(ClientSession session, UUID id) {
         Document filter = new Document("_id", id.toString());
         return Optional.ofNullable(rentCollection.find(session, filter).first());
@@ -49,13 +46,11 @@ public class RentRepository {
         return rentCollection.replaceOne(session, filter, updatedRent).wasAcknowledged();
     }
 
-    // Delete a Rent by its UUID
     public boolean deleteById(ClientSession session, UUID id) {
         Bson filter = eq("_id", id.toString());
         return rentCollection.deleteOne(filter).wasAcknowledged();
     }
 
-    // Retrieve all rents
     public List<Rent> findAll() {
         return StreamSupport.stream(rentCollection.find().spliterator(), false)
                 .collect(Collectors.toList());

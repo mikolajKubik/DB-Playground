@@ -1,3 +1,8 @@
+#######
+#
+# !!! IMPORTANT !!!
+# MONGODB CLUSTER IS READY TO USE RIGHT AROUND 1 MINUTE AFTER START OF THE LAST NODE
+#
 # docker compose -f docker-compose-windows.yml up -d
 # docker compose -f docker-compose-windows.yml down -v
 networks:

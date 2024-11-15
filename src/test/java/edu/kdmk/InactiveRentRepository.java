@@ -4,7 +4,6 @@ import edu.kdmk.config.MongoConfig;
 import edu.kdmk.managers.ClientManager;
 import edu.kdmk.managers.GameManager;
 import edu.kdmk.managers.InactiveRentManager;
-import edu.kdmk.managers.RentManager;
 import edu.kdmk.models.Client;
 import edu.kdmk.models.Rent;
 import edu.kdmk.models.game.BoardGame;
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 

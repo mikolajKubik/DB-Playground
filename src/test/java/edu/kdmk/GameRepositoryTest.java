@@ -5,8 +5,6 @@ import edu.kdmk.managers.GameManager;
 import edu.kdmk.models.codec.GameCodec;
 import edu.kdmk.models.game.BoardGame;
 import edu.kdmk.models.game.ComputerGame;
-import edu.kdmk.models.game.Game;
-import edu.kdmk.models.game.GameType;
 import org.bson.*;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
@@ -27,14 +25,12 @@ public class GameRepositoryTest {
         String connectionString = ConnectionStringProvider.getConnectionString();
         String databaseName = "ndb";
 
-        // Initialize MongoConfig before all tests
         mongoConfig = new MongoConfig(connectionString, databaseName);
     }
 
     @AfterAll
     static void tearDown() {
         try {
-            // Close MongoConfig after all tests
             if (mongoConfig != null) {
                 mongoConfig.close();
             }

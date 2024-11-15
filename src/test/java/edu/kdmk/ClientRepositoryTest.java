@@ -12,8 +12,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ClientRepositoryTest {
@@ -25,14 +23,12 @@ public class ClientRepositoryTest {
         String connectionString = ConnectionStringProvider.getConnectionString();
         String databaseName = "ndb";
 
-        // Initialize MongoConfig before all tests
         mongoConfig = new MongoConfig(connectionString, databaseName);
     }
 
     @AfterAll
     static void tearDown() {
         try {
-            // Close MongoConfig after all tests
             if (mongoConfig != null) {
                 mongoConfig.close();
             }

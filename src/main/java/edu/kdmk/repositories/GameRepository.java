@@ -3,7 +3,6 @@ package edu.kdmk.repositories;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.result.UpdateResult;
 import edu.kdmk.models.game.Game;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -25,7 +24,6 @@ public class GameRepository {
         this.gameCollection = database.getCollection("games", Game.class);
     }
 
-    // Insert a new Game
     public boolean insert(Game game) {
         return gameCollection.insertOne(game).wasAcknowledged();
     }
@@ -39,31 +37,26 @@ public class GameRepository {
         return Optional.ofNullable(gameCollection.find(filter).first());
     }
 
-    // Find a Game by its UUID
     public Optional<Game> findById(ClientSession session, UUID id) {
         Document filter = new Document("_id", id.toString());
         return Optional.ofNullable(gameCollection.find(session, filter).first());
     }
 
-    // Update a Game by its UUID, using the UUID from the Game object
     public boolean update(Game updatedGame) {
         Document filter = new Document("_id", updatedGame.getId().toString());
         return gameCollection.replaceOne(filter, updatedGame).wasAcknowledged();
     }
 
-    // Update a Game by its UUID, using the UUID from the Game object
     public boolean updateById(ClientSession session, Game updatedGame) {
         Document filter = new Document("_id", updatedGame.getId().toString());
         return gameCollection.replaceOne(session, filter, updatedGame).wasAcknowledged();
     }
 
-    // Delete a Game by its UUID
     public boolean deleteById(UUID id) {
         Document filter = new Document("_id", id.toString());
         return gameCollection.deleteOne(filter).wasAcknowledged();
     }
 
-    // Delete a Game by its UUID
     public boolean deleteById(ClientSession session, UUID id) {
         Document filter = new Document("_id", id.toString());
         return gameCollection.deleteOne(session, filter).wasAcknowledged();
@@ -74,23 +67,24 @@ public class GameRepository {
                 .collect(Collectors.toList());
     }
 
+    // Atomic increment to mark as rented
+    // https://medium.com/@codersauthority/handling-race-conditions-and-concurrent-resource-updates-in-node-and-mongodb-by-performing-atomic-9f1a902bd5fa
     public boolean markAsRented(ClientSession session, UUID gameId) {
         Bson filter = and(eq("_id", gameId.toString()), eq("rentalStatusCount", 0)); // Ensure game is not rented
         Bson update = inc("rentalStatusCount", 1); // Increment rental status count by 1
-        // Use Document as the return type to match the MongoDB expectations
+
         Document updatedGame = gameCollection.withDocumentClass(Document.class)
                 .findOneAndUpdate(session, filter, update);
-        System.out.println("Timestamp: " + java.time.LocalDateTime.now());
 
         return updatedGame != null; // Returns true if update was successful, false if not
     }
 
     // Atomic decrement to unmark as rented
+    // https://medium.com/@codersauthority/handling-race-conditions-and-concurrent-resource-updates-in-node-and-mongodb-by-performing-atomic-9f1a902bd5fa
     public boolean unmarkAsRented(ClientSession session, UUID gameId) {
         Bson filter = and(eq("_id", gameId.toString()), eq("rentalStatusCount", 1)); // Ensure game is rented by one renter
         Bson update = inc("rentalStatusCount", -1); // Decrement rental status count by 1
 
-        // Use Document as the return type to match the MongoDB expectations
         Document updatedGame = gameCollection.withDocumentClass(Document.class)
                 .findOneAndUpdate(session, filter, update);
         return updatedGame != null; // Returns true if update was successful, false if not

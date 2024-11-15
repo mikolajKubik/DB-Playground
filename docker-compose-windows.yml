@@ -2,6 +2,11 @@
 #
 # !!! IMPORTANT !!!
 # MONGODB CLUSTER IS READY TO USE RIGHT AROUND 1 MINUTE AFTER START OF THE LAST NODE
+# LOCALHOST ENTRIES FOR WINDOWS ARE REQUIRED
+#     ADD TO HOSTS FILE: C:\Windows\System32\drivers\etc\hosts
+#     127.0.0.1 mongo1
+#     127.0.0.1 mongo2
+#     127.0.0.1 mongo3
 #
 # docker compose -f docker-compose-windows.yml up -d
 # docker compose -f docker-compose-windows.yml down -v

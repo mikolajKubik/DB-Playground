@@ -16,12 +16,15 @@
 networks:
   mongo-network:
     driver: bridge
+  redis-network: { }
 
 volumes:
   mongo1-data:
   mongo2-data:
   mongo3-data:
   mongo-rs-key:
+  redis-stack-data:
+      driver: local
 
 services:
   mongo1:
@@ -152,3 +155,12 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://root:root@mongo1:27017,mongo2:27018,mongo3:27019/?replicaSet=rs0&authSource=admin
 
     restart: unless-stopped
+
+  redis-stack:
+    image: redis:7.4.1
+    ports:
+      - "8001:8001"
+      - "6379:6379"
+    networks:
+      - redis-network
+

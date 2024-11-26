@@ -32,6 +32,11 @@
             <version>5.11.3</version> <!-- You can specify the latest version -->
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>5.2.0</version>
+        </dependency>
     </dependencies>
 
 </project>

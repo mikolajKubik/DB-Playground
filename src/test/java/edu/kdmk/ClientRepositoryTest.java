@@ -26,7 +26,7 @@ public class ClientRepositoryTest {
         String connectionString = ConnectionStringProvider.getConnectionString();
         String databaseName = "ndb";
 
-        mongoConfig = new MongoConfig(connectionString, databaseName);
+        mongoConfig = new MongoConfig();
     }
 
     @AfterAll

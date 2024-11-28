@@ -8,6 +8,7 @@ import com.mongodb.client.MongoDatabase;
 import edu.kdmk.models.codec.ClientCodec;
 import edu.kdmk.models.codec.GameCodec;
 import edu.kdmk.models.codec.RentCodec;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 
@@ -24,7 +25,16 @@ public class MongoConfig implements AutoCloseable {
     private final MongoClient mongoClient;
     private final MongoDatabase database;
 
-    public MongoConfig(String connectionString, String databaseName) {
+//    public MongoConfig(String connectionString, String databaseName) {
+    public MongoConfig() {
+
+        Dotenv dotenv = Dotenv.load();
+
+        // Get host and port from environment variables
+        String connectionString = dotenv.get("MONGO_URL"); // Default to "localhost" if not set
+        String databaseName = dotenv.get("MONGO_DB"); // Default to "localhost" if not set
+
+
         // Instantiate individual codecs
         ClientCodec clientCodec = new ClientCodec();
         GameCodec gameCodec = new GameCodec();

@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class BenchmarkTestClient {
 
-    private static final int N = 10_000_000;
+    //private static final int N = 10_000_000;
 
     //private static List<String> DATA_FOR_TESTING = createData();
 
@@ -41,6 +41,8 @@ public class BenchmarkTestClient {
         Options opt = new OptionsBuilder()
                 .include(BenchmarkTestClient.class.getSimpleName())
                 .forks(1)
+                .warmupIterations(1)
+                .measurementIterations(1) // Jedna iteracja testowa
                 .build();
 
         new Runner(opt).run();
@@ -60,7 +62,7 @@ public class BenchmarkTestClient {
         String connectionString = ConnectionStringProvider.getConnectionString();
         String databaseName = "performance_test_db";
 
-        mongoConfig = new MongoConfig(connectionString, databaseName);
+        mongoConfig = new MongoConfig();
         redisConfig = new RedisConfig();
 
         // Initialize repositories

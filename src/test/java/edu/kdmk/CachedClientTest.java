@@ -40,7 +40,8 @@ public class CachedClientTest {
         String connectionString = ConnectionStringProvider.getConnectionString();
         String databaseName = "performance_test_db";
 
-        mongoConfig = new MongoConfig(connectionString, databaseName);
+//        mongoConfig = new MongoConfig(connectionString, databaseName);
+        mongoConfig = new MongoConfig();
         redisConfig = new RedisConfig();
 
         // Initialize repositories

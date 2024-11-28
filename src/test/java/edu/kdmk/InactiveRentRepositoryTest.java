@@ -35,7 +35,7 @@ public class InactiveRentRepositoryTest {
         String connectionString = ConnectionStringProvider.getConnectionString();
         String databaseName = "ndb";
 
-        mongoConfig = new MongoConfig(connectionString, databaseName);
+        mongoConfig = new MongoConfig();
         clientManager = new ClientManager(new ClientRepository(mongoConfig.getDatabase()));
         gameManager = new GameManager(new GameRepository(mongoConfig.getDatabase()));
     }

@@ -1,9 +1,11 @@
 package edu.kdmk.models.game;
 
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
+
+@Getter @Setter
 
 @ToString(callSuper = true)
 public class BoardGame extends Game {

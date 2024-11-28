@@ -23,33 +23,16 @@ public class Rent extends AbstractEntity {
     @Getter @Setter
     private int rentalPrice;
 
-    public Rent(LocalDate startDate, LocalDate endDate, Client client, Game game) {
-        super(); // UUID is auto-assigned
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.client = client;
-        this.game = game;
-        this.rentalPrice = 0;
+    public Rent() {
+        super();
     }
 
     public Rent(UUID id, LocalDate startDate, LocalDate endDate, Client client, Game game, int rentalPrice) {
-        super(id); // Use provided UUID
+        super(id);
         this.startDate = startDate;
         this.endDate = endDate;
         this.client = client;
         this.game = game;
         this.rentalPrice = rentalPrice;
-    }
-
-    @Override
-    public String toString() {
-        return "Rent{" +
-                "id=" + getId() +
-                ", startDate=" + startDate +
-                ", endDate=" + endDate +
-                ", client=" + client +
-                ", game=" + game +
-                ", rentalPrice=" + rentalPrice +
-                '}';
     }
 }

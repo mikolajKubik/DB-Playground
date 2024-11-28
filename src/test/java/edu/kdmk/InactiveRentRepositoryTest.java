@@ -7,16 +7,21 @@ import edu.kdmk.managers.InactiveRentManager;
 import edu.kdmk.models.Client;
 import edu.kdmk.models.Rent;
 import edu.kdmk.models.game.BoardGame;
+import edu.kdmk.models.game.GameType;
+import edu.kdmk.repositories.ClientRepository;
+import edu.kdmk.repositories.GameRepository;
+import edu.kdmk.repositories.InactiveRentRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class InactiveRentRepository {
+public class InactiveRentRepositoryTest {
 
     private static MongoConfig mongoConfig;
     private static GameManager gameManager;
@@ -31,8 +36,8 @@ public class InactiveRentRepository {
         String databaseName = "ndb";
 
         mongoConfig = new MongoConfig(connectionString, databaseName);
-        clientManager = new ClientManager(mongoConfig.getDatabase());
-        gameManager = new GameManager(mongoConfig.getDatabase());
+        clientManager = new ClientManager(new ClientRepository(mongoConfig.getDatabase()));
+        gameManager = new GameManager(new GameRepository(mongoConfig.getDatabase()));
     }
 
     @AfterAll
@@ -49,9 +54,9 @@ public class InactiveRentRepository {
 
     @BeforeEach
     void setupRent() {
-        game = new BoardGame("Uno2", 10, 2, 6);
+        game = new BoardGame(UUID.randomUUID(), "Uno2", GameType.BOARD_GAME,10, 0, 6, 8);
         gameManager.insertGame(game);
-        client = new Client("John", "Doe", "123 Main St");
+        client = new Client(UUID.randomUUID(), "John", "Doe", "123 Main St", 0);
         clientManager.insertClient(client);
     }
 
@@ -59,7 +64,7 @@ public class InactiveRentRepository {
     public void insertRentTest() {
         InactiveRentManager inactiveRentManager = new InactiveRentManager(mongoConfig.getDatabase());
 
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        Rent rent = new Rent(UUID.randomUUID(), LocalDate.now(), LocalDate.now().plusDays(9), client, game, 9);
 
         assertTrue(inactiveRentManager.createInactiveRent(rent));
         assertTrue(inactiveRentManager.findInactiveRentById(rent.getId()).isPresent());
@@ -68,9 +73,9 @@ public class InactiveRentRepository {
 
     @Test
     public void deleteRentTest() {
-        InactiveRentManager inactiveRentManager = new InactiveRentManager(mongoConfig.getDatabase());
+        InactiveRentManager inactiveRentManager = new InactiveRentManager(new InactiveRentRepository(mongoConfig.getDatabase()));
 
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        Rent rent = new Rent(UUID.randomUUID(), LocalDate.now(), LocalDate.now().plusDays(9), client, game, 12);
 
         assertTrue(inactiveRentManager.createInactiveRent(rent));
 

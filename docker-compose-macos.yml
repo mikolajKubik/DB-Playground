@@ -154,3 +154,23 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://root:root@111.222.32.4:27017,111.222.32.3:27018,111.222.32.2:27019/?replicaSet=rs0&authSource=admin
 
     restart: unless-stopped
+
+  redis:
+    restart: unless-stopped
+    hostname: redis
+    container_name: redis
+#    image: redis:7.4.1
+    image: redis/redis-stack:6.2.6-v17
+    ports:
+      - "8001:8001"
+      - "6379:6379"
+    networks:
+      mongo-network:
+        ipv4_address: 111.222.32.6
+    depends_on:
+      mongo3:
+        condition: service_healthy
+      mongo2:
+        condition: service_healthy
+      mongo1:
+        condition: service_healthy

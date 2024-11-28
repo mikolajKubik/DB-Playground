@@ -20,14 +20,11 @@ public class Client extends AbstractEntity {
     @Setter(AccessLevel.NONE)
     private int rentalCount;
 
-    public Client(String firstName, String lastName, String address) {
+    public Client() {
         super();
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.address = address;
     }
 
-    public Client(UUID id, String name, String lastName, String address, int rentalCount) {
+    public Client(UUID id, String firstName, String lastName, String address, int rentalCount) {
         super(id);
         this.firstName = name;
         this.lastName = lastName;

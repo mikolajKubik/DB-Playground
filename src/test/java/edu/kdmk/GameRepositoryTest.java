@@ -13,6 +13,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class GameRepositoryTest {
@@ -41,8 +43,8 @@ public class GameRepositoryTest {
 
     @BeforeEach
     void setupGames() {
-        boardGame = new BoardGame("Chinese board game", 5, 2, 4);
-        computerGame = new ComputerGame("Cyberpunk 2077", 5, "PC");
+        boardGame = new BoardGame(UUID.randomUUID(),"Chinese board game", GameType.BOARD_GAME, 5, 0, 4, 5);
+        computerGame = new ComputerGame(UUID.randomUUID(),"Cyberpunk 2077", GameType.COMPUTER_GAME, 5, 0,"PC");
     }
 
     @Test

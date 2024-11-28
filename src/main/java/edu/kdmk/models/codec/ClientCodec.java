@@ -47,6 +47,7 @@ public class ClientCodec implements Codec<Client> {
         reader.readEndDocument();
 
         return new Client(id, firstName, lastName, address, rentalCount); // Return a new Client with all fields
+
     }
 
     @Override

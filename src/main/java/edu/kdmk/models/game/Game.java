@@ -12,14 +12,15 @@ public abstract class Game extends AbstractEntity {
     @Getter @Setter
     private String name;
 
-    @Getter
-    private final GameType type;
+    private GameType type;
 
-    @Getter @Setter
     private int pricePerDay;
 
     @Getter @Setter
     private int rentalStatusCount;
+
+    public Game() {
+    }
 
     public Game(UUID id, String name, GameType type, int pricePerDay, int rentalStatusCount) {
         super(id);
@@ -29,10 +30,4 @@ public abstract class Game extends AbstractEntity {
         this.rentalStatusCount = rentalStatusCount;
     }
 
-    public Game(String name, GameType gameType, int pricePerDay) {
-        super(); // UUID auto-assigned
-        this.name = name;
-        this.type = gameType;
-        this.pricePerDay = pricePerDay;
-    }
 }

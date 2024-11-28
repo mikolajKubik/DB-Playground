@@ -1,5 +1,6 @@
 package edu.kdmk;
 
+@Deprecated
 public class ConnectionStringProvider {
     private static final String MACOS_CONNECTION_STRING = "mongodb://root:root@111.222.32.4:27017,111.222.32.3:27018,111.222.32.2:27019/?replicaSet=rs0&authSource=admin";
     private static final String WINDOWS_CONNECTION_STRING = "mongodb://root:root@mongo1:27017,mongo2:27018,mongo3:27019/?replicaSet=rs0&authSource=admin";

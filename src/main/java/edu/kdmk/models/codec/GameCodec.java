@@ -64,9 +64,9 @@ public class GameCodec implements Codec<Game> {
 
         // Use gameType to determine which subclass to return
         if (gameType == GameType.BOARD_GAME) {
-            return new BoardGame(id, name, pricePerDay, rentalStatusCount, minPlayers, maxPlayers);
+            return new BoardGame(id, name, gameType, pricePerDay, rentalStatusCount, minPlayers, maxPlayers);
         } else if (gameType == GameType.COMPUTER_GAME) {
-            return new ComputerGame(id, name, pricePerDay, rentalStatusCount, platform);
+            return new ComputerGame(id, name, gameType, pricePerDay, rentalStatusCount, platform);
         } else {
             throw new IllegalArgumentException("Unknown GameType: " + gameType);
         }

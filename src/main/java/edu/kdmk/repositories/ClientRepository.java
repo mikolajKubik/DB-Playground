@@ -17,7 +17,7 @@ import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Updates.inc;
 
 public class ClientRepository {
-    private final MongoCollection<Client> clientCollection;
+    protected final MongoCollection<Client> clientCollection;
 
     public ClientRepository(MongoDatabase database) {
         this.clientCollection = database.getCollection("clients", Client.class);

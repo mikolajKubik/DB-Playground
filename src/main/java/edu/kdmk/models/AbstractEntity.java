@@ -1,17 +1,15 @@
 package edu.kdmk.models;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
+@Getter @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 public abstract class AbstractEntity {
 
-    @Getter @Setter
     @EqualsAndHashCode.Include
     private UUID id;
 
@@ -20,9 +18,5 @@ public abstract class AbstractEntity {
 
     public AbstractEntity(UUID id) {
         this.id = id;
-    }
-
-    public AbstractEntity() {
-        this.id = UUID.randomUUID();
     }
 }

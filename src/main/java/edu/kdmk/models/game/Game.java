@@ -1,22 +1,20 @@
 package edu.kdmk.models.game;
 
 import edu.kdmk.models.AbstractEntity;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
+@Getter @Setter
 @ToString(callSuper = true)
 public abstract class Game extends AbstractEntity {
-    @Getter @Setter
     private String name;
 
     private GameType type;
 
     private int pricePerDay;
 
-    @Getter @Setter
     private int rentalStatusCount;
 
     public Game() {

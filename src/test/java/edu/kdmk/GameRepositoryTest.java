@@ -5,6 +5,8 @@ import edu.kdmk.managers.GameManager;
 import edu.kdmk.models.codec.GameCodec;
 import edu.kdmk.models.game.BoardGame;
 import edu.kdmk.models.game.ComputerGame;
+import edu.kdmk.models.game.GameType;
+import edu.kdmk.repositories.GameRepository;
 import org.bson.*;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
@@ -49,7 +51,7 @@ public class GameRepositoryTest {
 
     @Test
     void insertGameTest() {
-        GameManager gameManager = new GameManager(mongoConfig.getDatabase());
+        GameManager gameManager = new GameManager(new GameRepository(mongoConfig.getDatabase()));
 
         assertTrue(gameManager.insertGame(boardGame));
         assertTrue(gameManager.insertGame(computerGame));
@@ -65,7 +67,7 @@ public class GameRepositoryTest {
 
     @Test
     void deleteGamePositiveTest() {
-        GameManager gameManager = new GameManager(mongoConfig.getDatabase());
+        GameManager gameManager = new GameManager(new GameRepository(mongoConfig.getDatabase()));
 
         assertTrue(gameManager.insertGame(boardGame));
         assertTrue(gameManager.deleteGameById(boardGame.getId()));
@@ -78,7 +80,7 @@ public class GameRepositoryTest {
 
     @Test
     void deleteNonExistingGame() {
-        GameManager gameManager = new GameManager(mongoConfig.getDatabase());
+        GameManager gameManager = new GameManager(new GameRepository(mongoConfig.getDatabase()));
 
         assertTrue(gameManager.findGameById(boardGame.getId()).isEmpty());
         assertTrue(gameManager.deleteGameById(boardGame.getId()));
@@ -89,7 +91,7 @@ public class GameRepositoryTest {
 
     @Test
     void updateGameTest() {
-        GameManager gameManager = new GameManager(mongoConfig.getDatabase());
+        GameManager gameManager = new GameManager(new GameRepository(mongoConfig.getDatabase()));
 
         assertTrue(gameManager.insertGame(boardGame));
         boardGame.setName("New Chinese board game");

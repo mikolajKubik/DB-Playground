@@ -22,12 +22,16 @@ public class RentManager {
     private final GameRepository gameRepository;
     private final ClientRepository clientRepository;
 
-    public RentManager(MongoClient mongoClient, MongoDatabase database) {
+    public RentManager(MongoClient mongoClient,
+                       RentRepository rentRepository,
+                       GameRepository gameRepository,
+                       ClientRepository clientRepository,
+                       InactiveRentRepository inactiveRentRepository) {
         this.mongoClient = mongoClient;
-        this.rentRepository = new RentRepository(database);
-        this.gameRepository = new GameRepository(database);
-        this.clientRepository = new ClientRepository(database);
-        this.inactiveRentRepository = new InactiveRentRepository(database);
+        this.rentRepository = rentRepository;
+        this.gameRepository = gameRepository;
+        this.clientRepository = clientRepository;
+        this.inactiveRentRepository = inactiveRentRepository;
     }
 
 

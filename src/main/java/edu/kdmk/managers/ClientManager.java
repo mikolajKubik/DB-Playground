@@ -11,8 +11,8 @@ import java.util.UUID;
 public class ClientManager {
     private final ClientRepository clientRepository;
 
-    public ClientManager(MongoDatabase database) {
-        this.clientRepository = new ClientRepository(database);
+    public ClientManager(ClientRepository clientRepository) {
+        this.clientRepository = clientRepository;
     }
 
     public boolean insertClient(Client newClient) {

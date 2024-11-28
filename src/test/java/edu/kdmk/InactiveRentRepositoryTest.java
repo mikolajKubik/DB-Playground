@@ -62,7 +62,7 @@ public class InactiveRentRepositoryTest {
 
     @Test
     public void insertRentTest() {
-        InactiveRentManager inactiveRentManager = new InactiveRentManager(mongoConfig.getDatabase());
+        InactiveRentManager inactiveRentManager = new InactiveRentManager(new InactiveRentRepository(mongoConfig.getDatabase()));
 
         Rent rent = new Rent(UUID.randomUUID(), LocalDate.now(), LocalDate.now().plusDays(9), client, game, 9);
 

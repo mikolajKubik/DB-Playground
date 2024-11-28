@@ -1,14 +1,12 @@
 package edu.kdmk.models;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.UUID;
 
 @Getter @Setter
 @ToString(callSuper = true)
+
 public class Client extends AbstractEntity {
 
     private String firstName;
@@ -17,7 +15,6 @@ public class Client extends AbstractEntity {
 
     private String address;
 
-    @Setter(AccessLevel.NONE)
     private int rentalCount;
 
     public Client() {
@@ -26,7 +23,7 @@ public class Client extends AbstractEntity {
 
     public Client(UUID id, String firstName, String lastName, String address, int rentalCount) {
         super(id);
-        this.firstName = name;
+        this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
         this.rentalCount = rentalCount;

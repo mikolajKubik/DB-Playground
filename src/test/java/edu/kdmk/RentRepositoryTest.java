@@ -12,6 +12,11 @@ import edu.kdmk.models.codec.GameCodec;
 import edu.kdmk.models.codec.RentCodec;
 import edu.kdmk.models.game.BoardGame;
 import edu.kdmk.models.game.Game;
+import edu.kdmk.models.game.GameType;
+import edu.kdmk.repositories.ClientRepository;
+import edu.kdmk.repositories.GameRepository;
+import edu.kdmk.repositories.InactiveRentRepository;
+import edu.kdmk.repositories.RentRepository;
 import org.bson.*;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
@@ -44,9 +49,9 @@ public class RentRepositoryTest {
         String databaseName = "ndb";
 
         mongoConfig = new MongoConfig(connectionString, databaseName);
-        clientManager = new ClientManager(mongoConfig.getDatabase());
-        gameManager = new GameManager(mongoConfig.getDatabase());
-        inactiveRentManager = new InactiveRentManager(mongoConfig.getDatabase());
+        clientManager = new ClientManager(new ClientRepository(mongoConfig.getDatabase()));
+        gameManager = new GameManager(new GameRepository(mongoConfig.getDatabase()));
+        inactiveRentManager = new InactiveRentManager(new InactiveRentRepository(mongoConfig.getDatabase()));
     }
 
     @AfterAll
@@ -63,17 +68,21 @@ public class RentRepositoryTest {
 
     @BeforeEach
     void setupRent() {
-        game = new BoardGame("Uno2", 10, 2, 6);
+        game = new BoardGame(UUID.randomUUID(),"Uno2", GameType.BOARD_GAME, 10, 0, 2, 6);
         gameManager.insertGame(game);
-        client = new Client("John", "Doe", "123 Main St");
+        client = new Client(UUID.randomUUID(), "John", "Doe", "123 Main St", 0);
         clientManager.insertClient(client);
     }
 
     @Test
     public void insertRentTest() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(),
+                new RentRepository(mongoConfig.getDatabase()),
+                new GameRepository(mongoConfig.getDatabase()),
+                new ClientRepository(mongoConfig.getDatabase()),
+                new InactiveRentRepository(mongoConfig.getDatabase()));
 
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        Rent rent = new Rent(UUID.randomUUID(), LocalDate.now(), LocalDate.now().plusDays(9), client, game, 0);
         assertTrue(rentManager.createRent(rent));
         assertTrue(rentManager.findRentById(rent.getId()).isPresent());
         assertInstanceOf(Rent.class, rentManager.findRentById(rent.getId()).get());
@@ -86,16 +95,20 @@ public class RentRepositoryTest {
 
     @Test
     public void rentSameGame() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(),
+                new RentRepository(mongoConfig.getDatabase()),
+                new GameRepository(mongoConfig.getDatabase()),
+                new ClientRepository(mongoConfig.getDatabase()),
+                new InactiveRentRepository(mongoConfig.getDatabase()));
 
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        Rent rent = new Rent(UUID.randomUUID(), LocalDate.now(), LocalDate.now().plusDays(9), client, game, 0);
 
         rentManager.createRent(rent);
 
         assertTrue(rentManager.findRentById(rent.getId()).isPresent());
         assertEquals(1, gameManager.findGameById(game.getId()).get().getRentalStatusCount());
 
-        Rent rent2 = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        Rent rent2 = new Rent(UUID.randomUUID(), LocalDate.now(), LocalDate.now().plusDays(9), client, game, 0);
 
         assertThrows(IllegalStateException.class, () -> rentManager.createRent(rent2));
         assertTrue(rentManager.findRentById(rent2.getId()).isEmpty());
@@ -106,8 +119,12 @@ public class RentRepositoryTest {
 
     @Test
     public void endRentTest() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(2), client, game);
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(),
+                new RentRepository(mongoConfig.getDatabase()),
+                new GameRepository(mongoConfig.getDatabase()),
+                new ClientRepository(mongoConfig.getDatabase()),
+                new InactiveRentRepository(mongoConfig.getDatabase()));
+        Rent rent = new Rent(UUID.randomUUID(), LocalDate.now(), LocalDate.now().plusDays(2), client, game, 0);
         rentManager.createRent(rent);
 
         assertTrue(rentManager.completeRent(rent.getId()));
@@ -118,8 +135,12 @@ public class RentRepositoryTest {
 
     @Test
     public void extendedRentTest() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(),
+                new RentRepository(mongoConfig.getDatabase()),
+                new GameRepository(mongoConfig.getDatabase()),
+                new ClientRepository(mongoConfig.getDatabase()),
+                new InactiveRentRepository(mongoConfig.getDatabase()));
+        Rent rent = new Rent(UUID.randomUUID(), LocalDate.now(), LocalDate.now().plusDays(9), client, game, 0);
 
         rentManager.createRent(rent);
 
@@ -131,8 +152,12 @@ public class RentRepositoryTest {
 
     @Test
     public void endRentDateBeforeStart() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(),
+                new RentRepository(mongoConfig.getDatabase()),
+                new GameRepository(mongoConfig.getDatabase()),
+                new ClientRepository(mongoConfig.getDatabase()),
+                new InactiveRentRepository(mongoConfig.getDatabase()));
+        Rent rent = new Rent(UUID.randomUUID(), LocalDate.now(), LocalDate.now().plusDays(9), client, game, 0);
         rentManager.createRent(rent);
 
         assertFalse(rentManager.updateRentalEndDate(rent.getId(), LocalDate.now().minusDays(1)));
@@ -144,7 +169,7 @@ public class RentRepositoryTest {
 
         BsonDocument document = new BsonDocument();
         BsonWriter writer = new BsonDocumentWriter(document);
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        Rent rent = new Rent(UUID.randomUUID(), LocalDate.now(), LocalDate.now().plusDays(9), client, game, 0);
         codec.encode(writer, rent, EncoderContext.builder().build());
 
         assertEquals(rent.getId().toString(), document.getString("_id").getValue());
@@ -175,22 +200,31 @@ public class RentRepositoryTest {
     @Test
     public void optimisticLockTestTwoRentsOneClient() {
 
-        GameManager gameManager = new GameManager(mongoConfig.getDatabase());
+        GameManager gameManager = new GameManager(new GameRepository(mongoConfig.getDatabase()));
 
-        Game newGame = new BoardGame( "Uno", 2 ,2, 6);
+        Game newGame = new BoardGame(UUID.randomUUID(), "Uno", GameType.BOARD_GAME,2 ,0, 2, 6);
         gameManager.insertGame(newGame);
 
 
-        ClientManager clientManager = new ClientManager(mongoConfig.getDatabase());
+        ClientManager clientManager = new ClientManager(new ClientRepository(mongoConfig.getDatabase()));
 
-        Client newClient = new Client("John", "WDoe", "123 Main St");
+        Client newClient = new Client(UUID.randomUUID(),  "John", "WDoe", "123 Main St", 0);
         clientManager.insertClient(newClient);
-        Client newClient2 = new Client("Jane", "WDoe", "123 Main St");
+        Client newClient2 = new Client(UUID.randomUUID(), "Jane", "WDoe", "123 Main St", 0);
         clientManager.insertClient(newClient2);
 
 
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
-        RentManager rentManager2 = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(),
+                new RentRepository(mongoConfig.getDatabase()),
+                new GameRepository(mongoConfig.getDatabase()),
+                new ClientRepository(mongoConfig.getDatabase()),
+                new InactiveRentRepository(mongoConfig.getDatabase()));
+
+        RentManager rentManager2 = new RentManager(mongoConfig.getMongoClient(),
+                new RentRepository(mongoConfig.getDatabase()),
+                new GameRepository(mongoConfig.getDatabase()),
+                new ClientRepository(mongoConfig.getDatabase()),
+                new InactiveRentRepository(mongoConfig.getDatabase()));
 
 
         AtomicBoolean exceptionCaught = new AtomicBoolean(false);
@@ -203,7 +237,7 @@ public class RentRepositoryTest {
         Runnable rentTask1 = () -> {
             try {
                 latch.await();
-                Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), newClient, newGame);
+                Rent rent = new Rent(UUID.randomUUID(), LocalDate.now(), LocalDate.now().plusDays(9), newClient, newGame, 0);
                 rentManager.createRent(rent);
 
                 System.out.println("Rent1 added by thread: " + Thread.currentThread().getName());
@@ -219,7 +253,7 @@ public class RentRepositoryTest {
             try {
                 latch.await();
 
-                Rent rent2 = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), newClient2, newGame);
+                Rent rent2 = new Rent(UUID.randomUUID(), LocalDate.now(), LocalDate.now().plusDays(9), newClient2, newGame, 0);
                 rentManager2.createRent(rent2);
 
                 System.out.println("Rent2 added by thread: " + Thread.currentThread().getName());

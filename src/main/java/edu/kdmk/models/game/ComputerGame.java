@@ -1,23 +1,22 @@
 
 package edu.kdmk.models.game;
 
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
+@Getter @Setter
 @ToString(callSuper = true)
 public class ComputerGame extends Game {
-    @Getter
-    private final String platform;
+    private String platform;
 
-    public ComputerGame(UUID id, String name, int pricePerDay, int rentalStatusCount, String platform) {
-        super(id, name, GameType.COMPUTER_GAME, pricePerDay, rentalStatusCount);
-        this.platform = platform;
+    public ComputerGame() {
+        super();
     }
 
-    public ComputerGame(String name, int pricePerDay, String platform) {
-        super(name, GameType.COMPUTER_GAME, pricePerDay); // UUID is auto-assigned
+    public ComputerGame(UUID id, String name, GameType type, int pricePerDay, int rentalStatusCount, String platform) {
+        super(id, name, type, pricePerDay, rentalStatusCount);
         this.platform = platform;
     }
 }

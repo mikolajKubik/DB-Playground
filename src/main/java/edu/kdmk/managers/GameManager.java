@@ -11,8 +11,8 @@ import java.util.Optional;
 public class GameManager {
     private final GameRepository gameRepository;
 
-    public GameManager(MongoDatabase database) {
-        this.gameRepository = new GameRepository(database);
+    public GameManager(GameRepository gameRepository) {
+        this.gameRepository = gameRepository;
     }
 
     public boolean insertGame(Game newGame) {

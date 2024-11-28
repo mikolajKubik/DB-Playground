@@ -35,7 +35,7 @@ import redis.clients.jedis.JedisClientConfig;
 import redis.clients.jedis.JedisPooled;
 import redis.clients.jedis.json.commands.RedisJsonCommands;
 
-public class RedisConfig implements AutoCloseable {
+public class RedisConfig {
     private final JedisPooled jedisPooled;
 
     public RedisConfig() {
@@ -45,12 +45,5 @@ public class RedisConfig implements AutoCloseable {
 
     public JedisPooled getRedisJsonClient() {
         return jedisPooled; // JedisPooled implements RedisJsonCommands
-    }
-
-    @Override
-    public void close() throws Exception {
-        if (jedisPooled != null) {
-            jedisPooled.close();
-        }
     }
 }

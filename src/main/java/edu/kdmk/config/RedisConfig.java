@@ -59,4 +59,10 @@ public RedisConfig() {
     public JedisPooled getRedisJsonClient() {
         return jedisPooled; // JedisPooled implements RedisJsonCommands
     }
+
+    public void clearCache() {
+        if (jedisPooled != null) {
+            jedisPooled.flushAll();
+        }
+    }
 }

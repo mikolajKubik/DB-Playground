@@ -68,7 +68,7 @@ public class BenchmarkTestClient {
 
         // Initialize repositories
         clientRepository = new ClientRepository(mongoConfig.getDatabase());
-        cachedClientRepository = new CachedClientRepository(mongoConfig.getDatabase());
+        cachedClientRepository = new CachedClientRepository(mongoConfig.getDatabase(), redisConfig.getRedisJsonClient());
 
         // Create a sample client
         client = new Client(UUID.randomUUID(), "Mark", "Performance Test", "456 Test St", 0);

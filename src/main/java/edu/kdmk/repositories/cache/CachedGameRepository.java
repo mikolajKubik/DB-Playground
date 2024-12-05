@@ -40,6 +40,10 @@ public class CachedGameRepository extends GameRepository {
                 Game cachedGame = jsonb.fromJson(gameJson, BoardGame.class);
                 return Optional.of(cachedGame);
             }
+            if (gameJson != null && (gameJson.contains("COMPUTER_GAME"))) {
+                Game cachedGame = jsonb.fromJson(gameJson, ComputerGame.class);
+                return Optional.of(cachedGame);
+            }
         } catch (Exception e) {
             log.severe("Redis connection failed during findById. Key: " + cacheKey + ". Error: " + e.getMessage());
         }

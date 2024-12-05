@@ -23,9 +23,6 @@ public class ClientRepositoryTest {
 
     @BeforeAll
     static void setup() {
-        String connectionString = ConnectionStringProvider.getConnectionString();
-        String databaseName = "ndb";
-
         mongoConfig = new MongoConfig();
     }
 

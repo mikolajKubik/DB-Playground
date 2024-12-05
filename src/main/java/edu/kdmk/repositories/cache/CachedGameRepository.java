@@ -2,6 +2,8 @@ package edu.kdmk.repositories.cache;
 
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoDatabase;
+import edu.kdmk.models.game.BoardGame;
+import edu.kdmk.models.game.ComputerGame;
 import edu.kdmk.models.game.Game;
 import edu.kdmk.repositories.GameRepository;
 import jakarta.json.bind.Jsonb;
@@ -12,7 +14,6 @@ import redis.clients.jedis.JedisPooled;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Log
 public class CachedGameRepository extends GameRepository {
@@ -33,11 +34,10 @@ public class CachedGameRepository extends GameRepository {
     public Optional<Game> findById(UUID id) {
         String cacheKey = getGameCacheKey(id);
 
-        // Attempt to retrieve from Redis
         try {
             String gameJson = redisClient.get(cacheKey);
-            if (gameJson != null) {
-                Game cachedGame = jsonb.fromJson(gameJson, Game.class);
+            if (gameJson != null && (gameJson.contains("BOARD_GAME"))) {
+                Game cachedGame = jsonb.fromJson(gameJson, BoardGame.class);
                 return Optional.of(cachedGame);
             }
         } catch (Exception e) {
@@ -66,8 +66,12 @@ public class CachedGameRepository extends GameRepository {
 
         try {
             String gameJson = redisClient.get(cacheKey);
-            if (gameJson != null) {
-                Game cachedGame = jsonb.fromJson(gameJson, Game.class);
+            if (gameJson != null && (gameJson.contains("BOARD_GAME"))) {
+                Game cachedGame = jsonb.fromJson(gameJson, BoardGame.class);
+                return Optional.of(cachedGame);
+            }
+            if (gameJson != null && (gameJson.contains("COMPUTER_GAME"))) {
+                Game cachedGame = jsonb.fromJson(gameJson, ComputerGame.class);
                 return Optional.of(cachedGame);
             }
         } catch (Exception e) {
@@ -179,7 +183,6 @@ public class CachedGameRepository extends GameRepository {
 
     @Override
     public List<Game> findAll() {
-        // No caching for findAll as the dataset might be too large to cache entirely.
         return super.findAll();
     }
 }

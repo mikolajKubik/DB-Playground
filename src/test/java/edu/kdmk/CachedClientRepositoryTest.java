@@ -4,7 +4,6 @@ import edu.kdmk.config.MongoConfig;
 import edu.kdmk.config.RedisConfig;
 import edu.kdmk.managers.ClientManager;
 import edu.kdmk.models.Client;
-import edu.kdmk.repositories.ClientRepository;
 import edu.kdmk.repositories.cache.CachedClientRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -41,7 +40,12 @@ public class CachedClientRepositoryTest {
 
     @BeforeEach
     void setupClient() {
-        client = new Client(UUID.randomUUID(), "Ziut", "Deer", "123 Main St", 0);
+        UUID id = UUID.randomUUID();
+        client = new Client(id, "Ziut", "Deer", "123 Main St", 0);
+    }
+
+    private boolean isKeyInRedis(String key) {
+        return redisConfig.getRedisJsonClient().exists("client:" + key);
     }
 
     @Test
@@ -49,6 +53,8 @@ public class CachedClientRepositoryTest {
         ClientManager clientManager = new ClientManager(new CachedClientRepository(mongoConfig.getDatabase(), redisConfig.getRedisJsonClient()));
 
         assertTrue(clientManager.insertClient(client));
+
+        assertTrue(isKeyInRedis(client.getId().toString()));
 
         assertTrue(clientManager.findClientById(client.getId()).isPresent());
         assertInstanceOf(Client.class, clientManager.findClientById(client.getId()).get());
@@ -60,7 +66,11 @@ public class CachedClientRepositoryTest {
 
         assertTrue(clientManager.insertClient(client));
 
+        assertTrue(isKeyInRedis(client.getId().toString()));
+
         assertTrue(clientManager.deleteClientById(client.getId()));
+
+        assertFalse(isKeyInRedis(client.getId().toString()));
 
         assertTrue(clientManager.findClientById(client.getId()).isEmpty());
     }
@@ -71,6 +81,8 @@ public class CachedClientRepositoryTest {
 
         assertTrue(clientManager.findClientById(client.getId()).isEmpty());
 
+        assertFalse(isKeyInRedis(client.getId().toString()));
+
         assertTrue(clientManager.deleteClientById(client.getId()));
     }
 
@@ -80,11 +92,44 @@ public class CachedClientRepositoryTest {
 
         assertTrue(clientManager.insertClient(client));
 
+        assertTrue(isKeyInRedis(client.getId().toString()));
+
         client.setFirstName("Ziut2");
 
         assertTrue(clientManager.updateClient(client));
 
+        assertTrue(isKeyInRedis(client.getId().toString()));
+
         assertTrue(clientManager.findClientById(client.getId()).isPresent());
         assertEquals(client.getFirstName(), clientManager.findClientById(client.getId()).get().getFirstName());
+    }
+
+    @Test
+    void invalidateClientInRedisTest() {
+        CachedClientRepository cachedClientRepository = new CachedClientRepository(mongoConfig.getDatabase(), redisConfig.getRedisJsonClient());
+        cachedClientRepository.insert(client);
+
+        assertTrue(isKeyInRedis(client.getId().toString()));
+
+        cachedClientRepository.invalidateCache(client.getId());
+
+        assertFalse(isKeyInRedis(client.getId().toString()));
+    }
+
+    @Test
+    void invalidateCache() {
+        CachedClientRepository cachedClientRepository = new CachedClientRepository(mongoConfig.getDatabase(), redisConfig.getRedisJsonClient());
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        cachedClientRepository.insert(new Client(id1, "John1", "Deer", "123 Main St", 0));
+        cachedClientRepository.insert(new Client(id2, "John2", "Deer", "123 Main St", 0));
+
+        assertTrue(isKeyInRedis(id1.toString()));
+        assertTrue(isKeyInRedis(id2.toString()));
+
+        redisConfig.clearCache();
+
+        assertFalse(isKeyInRedis(id1.toString()));
+        assertFalse(isKeyInRedis(id2.toString()));
     }
 }

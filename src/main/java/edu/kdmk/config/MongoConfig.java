@@ -14,18 +14,11 @@ import org.bson.codecs.configuration.CodecRegistry;
 
 import java.io.IOException;
 
-        //Windows
-        //String connectionString = "mongodb://root:root@mongo1:27017,mongo2:27018,mongo3:27019/?replicaSet=rs0&authSource=admin";
-
-        //MacOS
-        //String connectionString = "mongodb://root:root@111.222.32.4:27017,111.222.32.3:27018,111.222.32.2:27019/?replicaSet=rs0&authSource=admin";
-
 public class MongoConfig implements AutoCloseable {
 
     private final MongoClient mongoClient;
     private final MongoDatabase database;
 
-//    public MongoConfig(String connectionString, String databaseName) {
     public MongoConfig() {
 
         Dotenv dotenv = Dotenv.load();

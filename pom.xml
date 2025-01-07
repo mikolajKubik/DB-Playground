@@ -12,6 +12,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <driver.version>4.17.0</driver.version>
     </properties>
 
     <dependencies>
@@ -20,6 +21,32 @@
             <artifactId>lombok</artifactId>
             <version>1.18.36</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.cassandra/java-driver-core -->
+        <dependency>
+            <groupId>com.datastax.oss</groupId>
+            <artifactId>java-driver-core</artifactId>
+            <version>${driver.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.datastax.oss</groupId>
+            <artifactId>java-driver-query-builder</artifactId>
+            <version>${driver.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.datastax.oss</groupId>
+            <artifactId>java-driver-mapper-runtime</artifactId>
+            <version>${driver.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.oss</groupId>
+            <artifactId>java-driver-mapper-processor</artifactId>
+            <version>${driver.version}</version>
+        </dependency>
+
+
+
     </dependencies>
 
 </project>

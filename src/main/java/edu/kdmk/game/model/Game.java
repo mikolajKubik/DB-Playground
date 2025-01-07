@@ -20,6 +20,9 @@ public class Game {
     @CqlName("game_id")
     private UUID game;
 
+    @CqlName("name")
+    private String name;
+
     @CqlName("type")
     private String type;
 

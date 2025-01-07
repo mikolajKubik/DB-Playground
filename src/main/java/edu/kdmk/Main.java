@@ -5,6 +5,7 @@ import edu.kdmk.config.CassandraConnector;
 import edu.kdmk.client.Client;
 import edu.kdmk.client.ClientDao;
 import edu.kdmk.client.ClientMapper;
+import edu.kdmk.config.CassandraSchemaCreator;
 
 import java.util.UUID;
 
@@ -19,6 +20,12 @@ public class Main {
             } else {
                 System.out.println("FAILURE: Session is null or closed.");
             }
+
+            CassandraSchemaCreator schemaCreator = new CassandraSchemaCreator(connector.getSession());
+//            schemaCreator.createKeyspace("rent_a_game");
+            schemaCreator.createClientsTable("rent_a_game");
+            schemaCreator.createGamesTable("rent_a_game");
+
 
             UUID uuid = UUID.randomUUID();
 

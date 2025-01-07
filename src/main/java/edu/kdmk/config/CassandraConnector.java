@@ -40,7 +40,7 @@ public class CassandraConnector implements AutoCloseable {
         SimpleStatement createKeyspace = keyspace.build();*/
 
         session.execute(getKeyspace());
-        session.execute(getClientTable());
+//        session.execute(getClientTable());
     }
 
     public CqlSession getSession() {

@@ -67,12 +67,10 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.36</version>
                         </path>
                         <path>
                             <groupId>com.datastax.oss</groupId>
                             <artifactId>java-driver-mapper-processor</artifactId>
-                            <version>${driver.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

@@ -18,7 +18,7 @@ public class RentManager {
         this.gameDao = gameDao;
     }
 
-    void saveRent(Rent rent) {
+    public void saveRent(Rent rent) {
         if (rent == null || rent.getClientId() == null || rent.getGameId() == null || rent.getRentId() == null || rent.getStartDate() == null || rent.getEndDate() == null) {
             throw new RuntimeException();
         }
@@ -29,28 +29,31 @@ public class RentManager {
 
         UUID gameId = rent.getGameId();
         Game gameToUpdate = gameDao.findById(gameId);
-        gameToUpdate.setRented(true);
+        if (gameToUpdate.isRented()) {
+            throw new RuntimeException();
+        }
+        gameToUpdate.setRented(true); // XDDDD
         gameDao.update(gameToUpdate);
 
         rent.setRentalPrice(calculateRentPrice(rent.getStartDate(), rent.getEndDate(), gameToUpdate.getPricePerDay()));
         rentDao.save(rent);
     }
 
-    List<Rent> findRentByClientId(UUID clientId) {
+    public List<Rent> findRentByClientId(UUID clientId) {
         if (clientId == null) {
             throw new RuntimeException();
         }
         return rentDao.findByClientId(clientId);
     }
 
-    List<Rent> findRentByGameId(UUID gameId) {
+    public List<Rent> findRentByGameId(UUID gameId) {
         if (gameId == null) {
             throw new RuntimeException();
         }
         return rentDao.findByGameId(gameId);
     }
 
-    void deleteRent(Rent rent) {
+    public void deleteRent(Rent rent) {
         if (rent == null || rent.getClientId() == null || rent.getGameId() == null || rent.getRentId() == null || rent.getStartDate() == null || rent.getEndDate() == null) {
             throw new RuntimeException();
         }
@@ -63,7 +66,7 @@ public class RentManager {
     }
 
 
-    void endRent(Rent rent) {
+    public void endRent(Rent rent) {
         if (rent == null || rent.getClientId() == null || rent.getGameId() == null || rent.getRentId() == null || rent.getStartDate() == null || rent.getEndDate() == null) {
             throw new RuntimeException();
         }

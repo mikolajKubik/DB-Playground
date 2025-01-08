@@ -9,11 +9,11 @@ public class ClientManager {
 
     private final ClientDao clientDao;
 
-    ClientManager(ClientDao clientDao) {
+    public ClientManager(ClientDao clientDao) {
         this.clientDao = clientDao;
     }
 
-    void saveClient(Client client) {
+    public void saveClient(Client client) {
         if (client == null || client.getClientId() == null || client.getFirstName() == null || client.getLastName() == null || client.getAddress() == null) {
             throw new RuntimeException();
         }
@@ -21,14 +21,14 @@ public class ClientManager {
         clientDao.save(client);
     }
 
-    Client findClientById(UUID clientId) {
+    public Client findClientById(UUID clientId) {
         if (clientId == null) {
             throw new RuntimeException();
         }
         return clientDao.findById(clientId);
     }
 
-    void delete(Client client) {
+    public void delete(Client client) {
         if (client== null || client.getClientId() == null) {
             throw new RuntimeException();
         }
@@ -36,14 +36,14 @@ public class ClientManager {
 
     }
 
-    void updateClient(Client client) {
+    public void updateClient(Client client) {
         if (client == null || client.getClientId() == null) {
             throw new RuntimeException();
         }
         clientDao.update(client);
     }
 
-    List<Client> findByFirstName(String firstName) {
+    public List<Client> findByFirstName(String firstName) {
          if (firstName == null) {
             throw new RuntimeException();
         }

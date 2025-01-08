@@ -8,32 +8,32 @@ public class GameManager {
 
     private final GameDao gameDao;
 
-    GameManager(GameDao gameDao) {
+    public GameManager(GameDao gameDao) {
         this.gameDao = gameDao;
     }
 
-    void saveGame(Game game) {
+    public void saveGame(Game game) {
         if (game == null || game.getGameId() == null) {
             throw new RuntimeException();
         }
         gameDao.save(game);
     }
 
-    Game findGameById(UUID gameId) {
+    public Game findGameById(UUID gameId) {
         if (gameId == null) {
             throw new RuntimeException();
         }
         return gameDao.findById(gameId);
     }
 
-    void deleteGame(Game game) {
+    public void deleteGame(Game game) {
         if (game == null || game.getGameId() == null) {
             throw new RuntimeException();
         }
         gameDao.delete(game);
     }
 
-    void updateGame(Game game) {
+    public void updateGame(Game game) {
         if (game == null || game.getGameId() == null) {
             throw new RuntimeException();
         }

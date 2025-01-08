@@ -62,6 +62,7 @@ public class CassandraConnector implements AutoCloseable {
         return keyspace.build();
     }
 
+    @Deprecated
     public SimpleStatement getClientTable() {
         return SchemaBuilder.createTable(CqlIdentifier.fromCql("clients"))
                 .ifNotExists()

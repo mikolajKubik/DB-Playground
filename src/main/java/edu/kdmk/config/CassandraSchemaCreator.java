@@ -55,4 +55,34 @@ public class CassandraSchemaCreator {
         session.execute(createTable);
         System.out.println("Table created: games");
     }
+
+    public void createRentByClientTable(String keyspace) {
+        SimpleStatement createTable = SchemaBuilder.createTable(CqlIdentifier.fromCql(keyspace), CqlIdentifier.fromCql("rent_by_client"))
+                .ifNotExists()
+                .withPartitionKey(CqlIdentifier.fromCql("client_id"), DataTypes.UUID)
+                .withClusteringColumn("start_date", DataTypes.TIMESTAMP)
+                .withClusteringColumn("rent_id", DataTypes.UUID)
+                .withColumn("end_date", DataTypes.TIMESTAMP)
+                .withColumn("game_id", DataTypes.UUID)
+                .withColumn("rental_price", DataTypes.INT)
+                .build();
+
+        session.execute(createTable);
+        System.out.println("Table created: rent_by_client");
+    }
+
+    public void createRentByGameTable(String keyspace) {
+        SimpleStatement createTable = SchemaBuilder.createTable(CqlIdentifier.fromCql(keyspace), CqlIdentifier.fromCql("rent_by_game"))
+                .ifNotExists()
+                .withPartitionKey(CqlIdentifier.fromCql("game_id"), DataTypes.UUID)
+                .withColumn("start_date", DataTypes.TIMESTAMP)
+                .withClusteringColumn("rent_id", DataTypes.UUID)
+                .withColumn("end_date", DataTypes.TIMESTAMP)
+                .withColumn("client_id", DataTypes.UUID)
+                .withColumn("rental_price", DataTypes.INT)
+                .build();
+
+        session.execute(createTable);
+        System.out.println("Table created: rent_by_game");
+    }
 }

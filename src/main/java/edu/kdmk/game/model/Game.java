@@ -16,20 +16,14 @@ import java.util.UUID;
 @CqlName("games")
 public class Game {
     @EqualsAndHashCode.Include
-    @PartitionKey
-    @CqlName("game_id")
-    private UUID game;
+    private UUID gameId;
 
-    @CqlName("name")
     private String name;
 
-    @CqlName("type")
     private String type;
 
-    @CqlName("rented")
     private boolean rented;
 
-    @CqlName("price_per_day") // elo
     private int pricePerDay;
 
 }

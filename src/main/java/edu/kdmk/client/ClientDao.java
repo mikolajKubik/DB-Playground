@@ -2,6 +2,7 @@ package edu.kdmk.client;
 
 import com.datastax.oss.driver.api.mapper.annotations.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Dao
@@ -25,7 +26,7 @@ public interface ClientDao {
 
     @StatementAttributes(consistencyLevel = "ONE", pageSize = 100)
     @Query("SELECT * FROM clients WHERE first_name = :firstName ALLOW FILTERING")
-    Iterable<Client> findByFirstName(String firstName);
+    List<Client> findByFirstName(String firstName);
 
 
 

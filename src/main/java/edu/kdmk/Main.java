@@ -47,7 +47,7 @@ public class Main {
 
             UUID uuid = UUID.randomUUID();
 
-            Client client = new Client(uuid, "Chuj", "Jebany", "Jebalem Ci Matke 69");
+            Client client = new Client(uuid, null, "Jebany", "Jebalem Ci Matke 69");
 
             ClientMapper mapper = new ClientMapperBuilder(connector.getSession()).build();
             ClientDao clientDao = mapper.clientDao("rent_a_game", "clients");

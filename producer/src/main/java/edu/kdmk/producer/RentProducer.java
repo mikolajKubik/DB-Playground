@@ -1,4 +1,4 @@
-package edu.kdmk.sender;
+package edu.kdmk.producer;
 
 import edu.kdmk.model.Rent;
 import edu.kdmk.model.codec.ClientCodec;
@@ -13,36 +13,41 @@ import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.bson.BsonDocument;
 import org.bson.BsonDocumentWriter;
-import org.bson.BsonString;
 import org.bson.BsonWriter;
 import org.bson.codecs.EncoderContext;
 
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-public class RentSender {
+public class RentProducer {
     private final String topicName;
 
-    private final KafkaProducer<String, String> producer;
+    private KafkaProducer<String, String> producer;
 
-    public RentSender(String topicName, KafkaProducer<String, String> producer) throws InterruptedException {
+    public RentProducer(String topicName) throws InterruptedException {
         this.topicName = topicName;
-        this.producer = producer;
+        initProducer();
+        createTopic();
+    }
 
-        if (isTopicExist(topicName)) {
-            System.out.println("Topic " + topicName + " exists");
-        } else {
-            System.out.println("Topic " + topicName + " does not exist");
-            createTopic();
-        }
+    public void initProducer() {
+        Properties producerConfig = new Properties();
+        producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                StringSerializer.class.getName());
+        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                StringSerializer.class.getName());
+        producerConfig.put(ProducerConfig.CLIENT_ID_CONFIG, "local");
+        producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                "kafka1:9192,kafka2:9292,kafka3:9392");
+        producerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
+        producer = new KafkaProducer<>(producerConfig);
     }
 
     public void createTopic() throws InterruptedException {
         Properties properties = new Properties();
-        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka1:9192,kafka1:9292,kafka3:9392");
+        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka1:9192,kafka2:9292,kafka3:9392");
         int partitionsNumber = 3;
         short replicationFactor = 3;
         try (Admin admin = Admin.create(properties)) {
@@ -54,8 +59,8 @@ public class RentSender {
             CreateTopicsResult result = admin.createTopics(List.of(newTopic), options);
             KafkaFuture<Void> futureResult = result.values().get(topicName);
             futureResult.get();
-        } catch (ExecutionException ee) {
-            System.out.println(ee.getCause());
+        } catch (Exception e) {
+            System.out.println(e.getCause());
         }
     }
 
@@ -68,35 +73,34 @@ public class RentSender {
         codec.encode(writer, rent, EncoderContext.builder().build());
 
         try {
-            createTopic();
             ProducerRecord<String, String> record = new ProducerRecord<>(topicName,
                     rent.getId().toString(), document.toJson());
             Future<RecordMetadata> sent = producer.send(record);
             RecordMetadata recordMetadata = sent.get();
-            System.out.println("Sender: rent sent to partition: " + recordMetadata.partition());
+            System.out.println("Sender: rent sent to partition: " + recordMetadata.toString());
         } catch (InterruptedException  | ExecutionException e) {
             System.out.println(e);
         }
 
     }
 
-    public boolean isTopicExist(String topicName) {
-        Properties properties = new Properties();
-        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka1:9192,kafka1:9292,kafka3:9392");
-        try (Admin admin = Admin.create(properties)) {
-            ListTopicsOptions options = new ListTopicsOptions();
-            options.listInternal(true);
-            Set<String> topics = admin.listTopics(options).names().get();
-            return topics.contains(topicName);
-        } catch (ExecutionException | InterruptedException e) {
-            System.out.println(e);
-            return false;
-        }
-    }
+//    public boolean isTopicExist(String topicName) {
+//        Properties properties = new Properties();
+//        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka1:9192,kafka1:9292,kafka3:9392");
+//        try (Admin admin = Admin.create(properties)) {
+//            ListTopicsOptions options = new ListTopicsOptions();
+//            options.listInternal(true);
+//            Set<String> topics = admin.listTopics(options).names().get();
+//            return topics.contains(topicName);
+//        } catch (ExecutionException | InterruptedException e) {
+//            System.out.println(e);
+//            return false;
+//        }
+//    }
 
     public void deleteTopic(String topicName) {
         Properties properties = new Properties();
-        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka1:9192,kafka1:9292,kafka3:9392");
+        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka1:9192,kafka2:9292,kafka3:9392");
         try (Admin admin = Admin.create(properties)) {
             DeleteTopicsResult result = admin.deleteTopics(List.of(topicName));
             KafkaFuture<Void> futureResult = result.all();

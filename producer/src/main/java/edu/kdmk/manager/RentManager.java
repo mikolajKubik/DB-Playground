@@ -2,7 +2,7 @@ package edu.kdmk.manager;
 
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
-import edu.kdmk.sender.RentSender;
+import edu.kdmk.producer.RentProducer;
 import edu.kdmk.model.Rent;
 import edu.kdmk.repository.ClientRepository;
 import edu.kdmk.repository.GameRepository;
@@ -21,7 +21,7 @@ public class RentManager {
     private final InactiveRentRepository inactiveRentRepository;
     private final GameRepository gameRepository;
     private final ClientRepository clientRepository;
-    private final RentSender rentSender;
+    private final RentProducer rentProducer;
 
     public RentManager(
             MongoClient mongoClient,
@@ -29,13 +29,13 @@ public class RentManager {
             GameRepository gameRepository,
             ClientRepository clientRepository,
             InactiveRentRepository inactiveRentRepository,
-            RentSender rentSender) {
+            RentProducer rentProducer) {
         this.mongoClient = mongoClient;
         this.rentRepository = rentRepository;
         this.gameRepository = gameRepository;
         this.clientRepository = clientRepository;
         this.inactiveRentRepository = inactiveRentRepository;
-        this.rentSender = rentSender;
+        this.rentProducer = rentProducer;
     }
 
     public boolean sendRent(Rent rent) {
@@ -59,7 +59,9 @@ public class RentManager {
 
             rent.setRentalPrice(calculateRentPrice(rent.getStartDate(), rent.getEndDate(), rent.getGame().getPricePerDay()));
 
-            rentSender.sendRent(rent);
+            rentProducer.sendRent(rent);
+
+            return true;
 
         } catch (Exception e) {
             session.abortTransaction();
@@ -67,7 +69,6 @@ public class RentManager {
         } finally {
             session.close();
         }
-        return false;
     }
 
 

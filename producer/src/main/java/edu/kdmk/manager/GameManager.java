@@ -1,8 +1,7 @@
-package edu.kdmk.managers;
+package edu.kdmk.manager;
 
-import com.mongodb.client.MongoDatabase;
-import edu.kdmk.models.game.Game;
-import edu.kdmk.repositories.GameRepository;
+import edu.kdmk.model.game.Game;
+import edu.kdmk.repository.GameRepository;
 
 import java.util.List;
 import java.util.UUID;
@@ -11,8 +10,8 @@ import java.util.Optional;
 public class GameManager {
     private final GameRepository gameRepository;
 
-    public GameManager(MongoDatabase database) {
-        this.gameRepository = new GameRepository(database);
+    public GameManager(GameRepository gameRepository) {
+        this.gameRepository = gameRepository;
     }
 
     public boolean insertGame(Game newGame) {

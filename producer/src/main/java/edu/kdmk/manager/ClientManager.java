@@ -1,8 +1,7 @@
-package edu.kdmk.managers;
+package edu.kdmk.manager;
 
-import com.mongodb.client.MongoDatabase;
-import edu.kdmk.models.Client;
-import edu.kdmk.repositories.ClientRepository;
+import edu.kdmk.model.Client;
+import edu.kdmk.repository.ClientRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,8 +10,8 @@ import java.util.UUID;
 public class ClientManager {
     private final ClientRepository clientRepository;
 
-    public ClientManager(MongoDatabase database) {
-        this.clientRepository = new ClientRepository(database);
+    public ClientManager(ClientRepository clientRepository) {
+        this.clientRepository = clientRepository;
     }
 
     public boolean insertClient(Client newClient) {

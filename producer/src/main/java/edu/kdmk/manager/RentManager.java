@@ -1,13 +1,13 @@
-package edu.kdmk.managers;
+package edu.kdmk.manager;
 
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoDatabase;
-import edu.kdmk.models.Rent;
-import edu.kdmk.repositories.ClientRepository;
-import edu.kdmk.repositories.GameRepository;
-import edu.kdmk.repositories.InactiveRentRepository;
-import edu.kdmk.repositories.RentRepository;
+import edu.kdmk.kafka.RentProducer;
+import edu.kdmk.model.Rent;
+import edu.kdmk.repository.ClientRepository;
+import edu.kdmk.repository.GameRepository;
+import edu.kdmk.repository.InactiveRentRepository;
+import edu.kdmk.repository.RentRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,25 +21,59 @@ public class RentManager {
     private final InactiveRentRepository inactiveRentRepository;
     private final GameRepository gameRepository;
     private final ClientRepository clientRepository;
+    private final RentProducer rentProducer;
 
-    public RentManager(MongoClient mongoClient, MongoDatabase database) {
+    public RentManager(
+            MongoClient mongoClient,
+            RentRepository rentRepository,
+            GameRepository gameRepository,
+            ClientRepository clientRepository,
+            InactiveRentRepository inactiveRentRepository,
+            RentProducer rentProducer) {
         this.mongoClient = mongoClient;
-        this.rentRepository = new RentRepository(database);
-        this.gameRepository = new GameRepository(database);
-        this.clientRepository = new ClientRepository(database);
-        this.inactiveRentRepository = new InactiveRentRepository(database);
+        this.rentRepository = rentRepository;
+        this.gameRepository = gameRepository;
+        this.clientRepository = clientRepository;
+        this.inactiveRentRepository = inactiveRentRepository;
+        this.rentProducer = rentProducer;
+    }
+
+    public boolean sendRent(Rent rent) {
+        validateRent(rent);
+        ClientSession session = mongoClient.startSession();
+        try {
+            session.startTransaction();
+
+            boolean markedAsRentedGame = gameRepository.markAsRented(session, rent.getGame().getId());
+            boolean markedAsRentedClient = clientRepository.markAsRented(session, rent.getClient().getId());
+
+            if (!markedAsRentedGame) {
+                session.abortTransaction();
+                throw new IllegalStateException("Game is not available for rent.");
+            }
+
+            if (!markedAsRentedClient) {
+                session.abortTransaction();
+                throw new IllegalStateException("Client is not available for rent.");
+            }
+
+            rent.setRentalPrice(calculateRentPrice(rent.getStartDate(), rent.getEndDate(), rent.getGame().getPricePerDay()));
+
+            rentProducer.sendRent(rent);
+
+        } catch (Exception e) {
+            session.abortTransaction();
+            throw e;
+        } finally {
+            session.close();
+        }
+        return false;
     }
 
 
     // Method to create a new Rent, mark Client and Game as rented
     public boolean createRent(Rent rent) {
-        if (rent.getClient() == null || rent.getGame() == null || rent.getStartDate() == null || rent.getEndDate() == null) {
-            throw new IllegalArgumentException("Client, Game, Start Date and End Date are required.");
-        }
-
-        if (!isStartDateBeforeEndDate(rent.getStartDate(), rent.getEndDate())) {
-            throw new IllegalArgumentException("Start Date must be before End Date.");
-        }
+        validateRent(rent);
 
         try (ClientSession session = mongoClient.startSession()) {
             session.startTransaction();
@@ -69,6 +103,16 @@ public class RentManager {
             throw e;
         }
         return false;
+    }
+
+    public void validateRent(Rent rent) {
+        if (rent.getClient() == null || rent.getGame() == null || rent.getStartDate() == null || rent.getEndDate() == null) {
+            throw new IllegalArgumentException("Client, Game, Start Date and End Date are required.");
+        }
+
+        if (!isStartDateBeforeEndDate(rent.getStartDate(), rent.getEndDate())) {
+            throw new IllegalArgumentException("Start Date must be before End Date.");
+        }
     }
 
     public Optional<Rent> findRentById(UUID id) {

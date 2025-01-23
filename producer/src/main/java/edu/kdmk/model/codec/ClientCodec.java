@@ -1,6 +1,6 @@
-package edu.kdmk.models.codec;
+package edu.kdmk.model.codec;
 
-import edu.kdmk.models.Client;
+import edu.kdmk.model.Client;
 import org.bson.BsonReader;
 import org.bson.BsonWriter;
 import org.bson.codecs.Codec;

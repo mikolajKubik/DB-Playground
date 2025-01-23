@@ -1,9 +1,10 @@
 package edu.kdmk;
 
 import edu.kdmk.config.MongoConfig;
-import edu.kdmk.managers.ClientManager;
-import edu.kdmk.models.Client;
-import edu.kdmk.models.codec.ClientCodec;
+import edu.kdmk.manager.ClientManager;
+import edu.kdmk.model.Client;
+import edu.kdmk.model.codec.ClientCodec;
+import edu.kdmk.repository.ClientRepository;
 import org.bson.*;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ClientRepositoryTest {
     private static MongoConfig mongoConfig;
+    private static ClientRepository clientRepository;
     Client client;
 
     @BeforeAll
@@ -24,6 +26,7 @@ public class ClientRepositoryTest {
         String databaseName = "ndb";
 
         mongoConfig = new MongoConfig(connectionString, databaseName);
+        clientRepository = new ClientRepository(mongoConfig.getDatabase());
     }
 
     @AfterAll
@@ -44,7 +47,7 @@ public class ClientRepositoryTest {
 
     @Test
     void insertClientTest() {
-        ClientManager clientManager = new ClientManager(mongoConfig.getDatabase());
+        ClientManager clientManager = new ClientManager(clientRepository);
 
         assertTrue(clientManager.insertClient(client));
 
@@ -54,7 +57,7 @@ public class ClientRepositoryTest {
 
     @Test
     void deleteClientPositiveTest() {
-        ClientManager clientManager = new ClientManager(mongoConfig.getDatabase());
+        ClientManager clientManager = new ClientManager(clientRepository);
 
         assertTrue(clientManager.insertClient(client));
 
@@ -65,7 +68,7 @@ public class ClientRepositoryTest {
 
     @Test
     void deleteNonExistingClientTest() {
-        ClientManager clientManager = new ClientManager(mongoConfig.getDatabase());
+        ClientManager clientManager = new ClientManager(clientRepository);
 
         assertTrue(clientManager.findClientById(client.getId()).isEmpty());
 
@@ -74,7 +77,7 @@ public class ClientRepositoryTest {
 
     @Test
     void updateClientTest() {
-        ClientManager clientManager = new ClientManager(mongoConfig.getDatabase());
+        ClientManager clientManager = new ClientManager(clientRepository);
 
         assertTrue(clientManager.insertClient(client));
 

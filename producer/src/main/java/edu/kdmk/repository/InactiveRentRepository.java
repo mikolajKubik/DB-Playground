@@ -1,9 +1,9 @@
-package edu.kdmk.repositories;
+package edu.kdmk.repository;
 
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import edu.kdmk.models.Rent;
+import edu.kdmk.model.Rent;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 

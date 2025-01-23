@@ -5,9 +5,9 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
-import edu.kdmk.models.codec.ClientCodec;
-import edu.kdmk.models.codec.GameCodec;
-import edu.kdmk.models.codec.RentCodec;
+import edu.kdmk.model.codec.ClientCodec;
+import edu.kdmk.model.codec.GameCodec;
+import edu.kdmk.model.codec.RentCodec;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 

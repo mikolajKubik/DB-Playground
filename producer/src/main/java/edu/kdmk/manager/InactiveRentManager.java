@@ -1,8 +1,7 @@
-package edu.kdmk.managers;
+package edu.kdmk.manager;
 
-import com.mongodb.client.MongoDatabase;
-import edu.kdmk.models.Rent;
-import edu.kdmk.repositories.InactiveRentRepository;
+import edu.kdmk.model.Rent;
+import edu.kdmk.repository.InactiveRentRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,8 +10,8 @@ import java.util.UUID;
 public class InactiveRentManager {
     private final InactiveRentRepository inactiveRentRepository;
 
-    public InactiveRentManager(MongoDatabase database) {
-        this.inactiveRentRepository = new InactiveRentRepository(database);
+    public InactiveRentManager(InactiveRentRepository inactiveRentRepository) {
+        this.inactiveRentRepository = inactiveRentRepository;
     }
 
     public boolean createInactiveRent(Rent rent) {

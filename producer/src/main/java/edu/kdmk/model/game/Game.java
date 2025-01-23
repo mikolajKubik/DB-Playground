@@ -1,6 +1,6 @@
-package edu.kdmk.models.game;
+package edu.kdmk.model.game;
 
-import edu.kdmk.models.AbstractEntity;
+import edu.kdmk.model.AbstractEntity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

@@ -1,4 +1,4 @@
-package edu.kdmk.models;
+package edu.kdmk.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

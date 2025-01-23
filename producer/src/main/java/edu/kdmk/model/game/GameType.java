@@ -1,4 +1,4 @@
-package edu.kdmk.models.game;
+package edu.kdmk.model.game;
 
 public enum GameType {
     BOARD_GAME("BoardGame"),

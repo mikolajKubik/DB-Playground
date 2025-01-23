@@ -1,9 +1,9 @@
-package edu.kdmk.models.codec;
+package edu.kdmk.model.codec;
 
-import edu.kdmk.models.game.BoardGame;
-import edu.kdmk.models.game.ComputerGame;
-import edu.kdmk.models.game.Game;
-import edu.kdmk.models.game.GameType;
+import edu.kdmk.model.game.BoardGame;
+import edu.kdmk.model.game.ComputerGame;
+import edu.kdmk.model.game.Game;
+import edu.kdmk.model.game.GameType;
 import org.bson.BsonReader;
 import org.bson.BsonType;
 import org.bson.BsonWriter;

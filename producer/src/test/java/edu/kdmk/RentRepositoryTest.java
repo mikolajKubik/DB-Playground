@@ -1,17 +1,22 @@
 package edu.kdmk;
 
 import edu.kdmk.config.MongoConfig;
-import edu.kdmk.managers.ClientManager;
-import edu.kdmk.managers.GameManager;
-import edu.kdmk.managers.InactiveRentManager;
-import edu.kdmk.managers.RentManager;
-import edu.kdmk.models.Client;
-import edu.kdmk.models.Rent;
-import edu.kdmk.models.codec.ClientCodec;
-import edu.kdmk.models.codec.GameCodec;
-import edu.kdmk.models.codec.RentCodec;
-import edu.kdmk.models.game.BoardGame;
-import edu.kdmk.models.game.Game;
+import edu.kdmk.kafka.RentProducer;
+import edu.kdmk.manager.ClientManager;
+import edu.kdmk.manager.GameManager;
+import edu.kdmk.manager.InactiveRentManager;
+import edu.kdmk.manager.RentManager;
+import edu.kdmk.model.Client;
+import edu.kdmk.model.Rent;
+import edu.kdmk.model.codec.ClientCodec;
+import edu.kdmk.model.codec.GameCodec;
+import edu.kdmk.model.codec.RentCodec;
+import edu.kdmk.model.game.BoardGame;
+import edu.kdmk.model.game.Game;
+import edu.kdmk.repository.ClientRepository;
+import edu.kdmk.repository.GameRepository;
+import edu.kdmk.repository.InactiveRentRepository;
+import edu.kdmk.repository.RentRepository;
 import org.bson.*;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
@@ -35,6 +40,11 @@ public class RentRepositoryTest {
     private static ClientManager clientManager;
     private static GameManager gameManager;
     private static InactiveRentManager inactiveRentManager;
+    private static InactiveRentRepository inactiveRentRepository;
+    private static ClientRepository clientRepository;
+    private static GameRepository gameRepository;
+    private static RentProducer rentProducer;
+
     Client client;
     BoardGame game;
 
@@ -44,9 +54,16 @@ public class RentRepositoryTest {
         String databaseName = "ndb";
 
         mongoConfig = new MongoConfig(connectionString, databaseName);
-        clientManager = new ClientManager(mongoConfig.getDatabase());
-        gameManager = new GameManager(mongoConfig.getDatabase());
-        inactiveRentManager = new InactiveRentManager(mongoConfig.getDatabase());
+        clientRepository = new ClientRepository(mongoConfig.getDatabase());
+        clientManager = new ClientManager(clientRepository);
+
+        gameRepository = new GameRepository(mongoConfig.getDatabase());
+        gameManager = new GameManager(gameRepository);
+
+        inactiveRentRepository = new InactiveRentRepository(mongoConfig.getDatabase());
+        inactiveRentManager = new InactiveRentManager(inactiveRentRepository);
+
+        rentProducer = new RentProducer("rents");
     }
 
     @AfterAll
@@ -71,7 +88,7 @@ public class RentRepositoryTest {
 
     @Test
     public void insertRentTest() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentProducer);
 
         Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
         assertTrue(rentManager.createRent(rent));
@@ -86,7 +103,7 @@ public class RentRepositoryTest {
 
     @Test
     public void rentSameGame() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentProducer);
 
         Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
 
@@ -106,7 +123,7 @@ public class RentRepositoryTest {
 
     @Test
     public void endRentTest() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentProducer);
         Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(2), client, game);
         rentManager.createRent(rent);
 
@@ -118,7 +135,7 @@ public class RentRepositoryTest {
 
     @Test
     public void extendedRentTest() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentProducer);
         Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
 
         rentManager.createRent(rent);
@@ -131,7 +148,7 @@ public class RentRepositoryTest {
 
     @Test
     public void endRentDateBeforeStart() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentProducer);
         Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
         rentManager.createRent(rent);
 
@@ -175,13 +192,13 @@ public class RentRepositoryTest {
     @Test
     public void optimisticLockTestTwoRentsOneClient() {
 
-        GameManager gameManager = new GameManager(mongoConfig.getDatabase());
+        GameManager gameManager = new GameManager(new GameRepository(mongoConfig.getDatabase()));
 
         Game newGame = new BoardGame( "Uno", 2 ,2, 6);
         gameManager.insertGame(newGame);
 
 
-        ClientManager clientManager = new ClientManager(mongoConfig.getDatabase());
+        ClientManager clientManager = new ClientManager(new ClientRepository(mongoConfig.getDatabase()));
 
         Client newClient = new Client("John", "WDoe", "123 Main St");
         clientManager.insertClient(newClient);
@@ -189,8 +206,8 @@ public class RentRepositoryTest {
         clientManager.insertClient(newClient2);
 
 
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
-        RentManager rentManager2 = new RentManager(mongoConfig.getMongoClient(), mongoConfig.getDatabase());
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentProducer);
+        RentManager rentManager2 = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentProducer);
 
 
         AtomicBoolean exceptionCaught = new AtomicBoolean(false);

@@ -1,12 +1,15 @@
 package edu.kdmk;
 
 import edu.kdmk.config.MongoConfig;
-import edu.kdmk.managers.ClientManager;
-import edu.kdmk.managers.GameManager;
-import edu.kdmk.managers.InactiveRentManager;
-import edu.kdmk.models.Client;
-import edu.kdmk.models.Rent;
-import edu.kdmk.models.game.BoardGame;
+import edu.kdmk.manager.ClientManager;
+import edu.kdmk.manager.GameManager;
+import edu.kdmk.manager.InactiveRentManager;
+import edu.kdmk.model.Client;
+import edu.kdmk.model.Rent;
+import edu.kdmk.model.game.BoardGame;
+import edu.kdmk.repository.ClientRepository;
+import edu.kdmk.repository.GameRepository;
+import edu.kdmk.repository.InactiveRentRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +19,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class InactiveRentRepository {
+public class InactiveRentRepositoryTest {
 
     private static MongoConfig mongoConfig;
     private static GameManager gameManager;
@@ -31,8 +34,8 @@ public class InactiveRentRepository {
         String databaseName = "ndb";
 
         mongoConfig = new MongoConfig(connectionString, databaseName);
-        clientManager = new ClientManager(mongoConfig.getDatabase());
-        gameManager = new GameManager(mongoConfig.getDatabase());
+        clientManager = new ClientManager(new ClientRepository(mongoConfig.getDatabase()));
+        gameManager = new GameManager(new GameRepository(mongoConfig.getDatabase()));
     }
 
     @AfterAll
@@ -57,7 +60,7 @@ public class InactiveRentRepository {
 
     @Test
     public void insertRentTest() {
-        InactiveRentManager inactiveRentManager = new InactiveRentManager(mongoConfig.getDatabase());
+        InactiveRentManager inactiveRentManager = new InactiveRentManager(new InactiveRentRepository(mongoConfig.getDatabase()));
 
         Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
 
@@ -68,7 +71,7 @@ public class InactiveRentRepository {
 
     @Test
     public void deleteRentTest() {
-        InactiveRentManager inactiveRentManager = new InactiveRentManager(mongoConfig.getDatabase());
+        InactiveRentManager inactiveRentManager = new InactiveRentManager(new InactiveRentRepository(mongoConfig.getDatabase()));
 
         Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
 

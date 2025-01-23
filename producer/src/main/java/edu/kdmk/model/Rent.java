@@ -1,6 +1,6 @@
-package edu.kdmk.models;
+package edu.kdmk.model;
 
-import edu.kdmk.models.game.Game;
+import edu.kdmk.model.game.Game;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -32,6 +32,7 @@ public class RentCodec implements Codec<Rent> {
         Client client = null;
         Game game = null;
         int rentalPrice = 0;
+        String rentalCompanyName = null;
 
         while (reader.readBsonType() != org.bson.BsonType.END_OF_DOCUMENT) {
             String fieldName = reader.readName();
@@ -54,6 +55,9 @@ public class RentCodec implements Codec<Rent> {
                 case "rentalPrice":
                     rentalPrice = reader.readInt32();
                     break;
+                case "rentalCompanyName":
+                    rentalCompanyName = reader.readString();
+                    break;
                 default:
                     reader.skipValue();
             }
@@ -61,7 +65,7 @@ public class RentCodec implements Codec<Rent> {
 
         reader.readEndDocument();
 
-        return new Rent(id, startDate, endDate, client, game, rentalPrice);
+        return new Rent(id, startDate, endDate, client, game, rentalPrice, rentalCompanyName);
     }
 
     @Override
@@ -80,6 +84,7 @@ public class RentCodec implements Codec<Rent> {
         gameCodec.encode(writer, value.getGame(), encoderContext);
 
         writer.writeInt32("rentalPrice", value.getRentalPrice());
+        writer.writeString("rentalCompanyName", value.getRentalCompanyName());
 
         writer.writeEndDocument();
     }

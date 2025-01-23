@@ -62,7 +62,7 @@ public class InactiveRentRepositoryTest {
     public void insertRentTest() {
         InactiveRentManager inactiveRentManager = new InactiveRentManager(new InactiveRentRepository(mongoConfig.getDatabase()));
 
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game, "KDMK");
 
         assertTrue(inactiveRentManager.createInactiveRent(rent));
         assertTrue(inactiveRentManager.findInactiveRentById(rent.getId()).isPresent());
@@ -73,7 +73,7 @@ public class InactiveRentRepositoryTest {
     public void deleteRentTest() {
         InactiveRentManager inactiveRentManager = new InactiveRentManager(new InactiveRentRepository(mongoConfig.getDatabase()));
 
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game, "KDMK");
 
         assertTrue(inactiveRentManager.createInactiveRent(rent));
 

@@ -9,6 +9,9 @@ import java.util.UUID;
 
 public class Rent extends AbstractEntity {
     @Getter @Setter
+    private String rentalCompanyName;
+
+    @Getter @Setter
     private LocalDate startDate;
 
     @Getter @Setter
@@ -23,22 +26,24 @@ public class Rent extends AbstractEntity {
     @Getter @Setter
     private int rentalPrice;
 
-    public Rent(LocalDate startDate, LocalDate endDate, Client client, Game game) {
+    public Rent(LocalDate startDate, LocalDate endDate, Client client, Game game, String rentalCompanyName) {
         super(); // UUID is auto-assigned
         this.startDate = startDate;
         this.endDate = endDate;
         this.client = client;
         this.game = game;
         this.rentalPrice = 0;
+        this.rentalCompanyName = rentalCompanyName;
     }
 
-    public Rent(UUID id, LocalDate startDate, LocalDate endDate, Client client, Game game, int rentalPrice) {
+    public Rent(UUID id, LocalDate startDate, LocalDate endDate, Client client, Game game, int rentalPrice, String rentalCompanyName) {
         super(id); // Use provided UUID
         this.startDate = startDate;
         this.endDate = endDate;
         this.client = client;
         this.game = game;
         this.rentalPrice = rentalPrice;
+        this.rentalCompanyName = rentalCompanyName;
     }
 
     @Override

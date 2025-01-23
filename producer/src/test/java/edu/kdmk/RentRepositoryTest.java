@@ -1,7 +1,8 @@
 package edu.kdmk;
 
+import edu.kdmk.config.KafkaConfig;
 import edu.kdmk.config.MongoConfig;
-import edu.kdmk.kafka.RentProducer;
+import edu.kdmk.sender.RentSender;
 import edu.kdmk.manager.ClientManager;
 import edu.kdmk.manager.GameManager;
 import edu.kdmk.manager.InactiveRentManager;
@@ -17,6 +18,7 @@ import edu.kdmk.repository.ClientRepository;
 import edu.kdmk.repository.GameRepository;
 import edu.kdmk.repository.InactiveRentRepository;
 import edu.kdmk.repository.RentRepository;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.bson.*;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
@@ -43,13 +45,13 @@ public class RentRepositoryTest {
     private static InactiveRentRepository inactiveRentRepository;
     private static ClientRepository clientRepository;
     private static GameRepository gameRepository;
-    private static RentProducer rentProducer;
+    private static RentSender rentSender;
 
     Client client;
     BoardGame game;
 
     @BeforeAll
-    static void setup() {
+    static void setup() throws InterruptedException {
         String connectionString = ConnectionStringProvider.getConnectionString();
         String databaseName = "ndb";
 
@@ -63,7 +65,8 @@ public class RentRepositoryTest {
         inactiveRentRepository = new InactiveRentRepository(mongoConfig.getDatabase());
         inactiveRentManager = new InactiveRentManager(inactiveRentRepository);
 
-        rentProducer = new RentProducer("rents");
+
+        rentSender = new RentSender("rents", new KafkaConfig().getProducer());
     }
 
     @AfterAll
@@ -88,9 +91,9 @@ public class RentRepositoryTest {
 
     @Test
     public void insertRentTest() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentProducer);
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentSender);
 
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game, "KDMK");
         assertTrue(rentManager.createRent(rent));
         assertTrue(rentManager.findRentById(rent.getId()).isPresent());
         assertInstanceOf(Rent.class, rentManager.findRentById(rent.getId()).get());
@@ -103,16 +106,16 @@ public class RentRepositoryTest {
 
     @Test
     public void rentSameGame() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentProducer);
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentSender);
 
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game, "KDMK");
 
         rentManager.createRent(rent);
 
         assertTrue(rentManager.findRentById(rent.getId()).isPresent());
         assertEquals(1, gameManager.findGameById(game.getId()).get().getRentalStatusCount());
 
-        Rent rent2 = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        Rent rent2 = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game, "KDMK");
 
         assertThrows(IllegalStateException.class, () -> rentManager.createRent(rent2));
         assertTrue(rentManager.findRentById(rent2.getId()).isEmpty());
@@ -123,8 +126,8 @@ public class RentRepositoryTest {
 
     @Test
     public void endRentTest() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentProducer);
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(2), client, game);
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentSender);
+        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(2), client, game, "KDMK");
         rentManager.createRent(rent);
 
         assertTrue(rentManager.completeRent(rent.getId()));
@@ -135,8 +138,8 @@ public class RentRepositoryTest {
 
     @Test
     public void extendedRentTest() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentProducer);
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentSender);
+        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game, "KDMK");
 
         rentManager.createRent(rent);
 
@@ -148,8 +151,8 @@ public class RentRepositoryTest {
 
     @Test
     public void endRentDateBeforeStart() {
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentProducer);
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentSender);
+        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game, "KDMK");
         rentManager.createRent(rent);
 
         assertFalse(rentManager.updateRentalEndDate(rent.getId(), LocalDate.now().minusDays(1)));
@@ -161,7 +164,7 @@ public class RentRepositoryTest {
 
         BsonDocument document = new BsonDocument();
         BsonWriter writer = new BsonDocumentWriter(document);
-        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game);
+        Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), client, game, "KDMK");
         codec.encode(writer, rent, EncoderContext.builder().build());
 
         assertEquals(rent.getId().toString(), document.getString("_id").getValue());
@@ -206,8 +209,8 @@ public class RentRepositoryTest {
         clientManager.insertClient(newClient2);
 
 
-        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentProducer);
-        RentManager rentManager2 = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentProducer);
+        RentManager rentManager = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentSender);
+        RentManager rentManager2 = new RentManager(mongoConfig.getMongoClient(), new RentRepository(mongoConfig.getDatabase()), gameRepository, clientRepository, inactiveRentRepository, rentSender);
 
 
         AtomicBoolean exceptionCaught = new AtomicBoolean(false);
@@ -220,7 +223,7 @@ public class RentRepositoryTest {
         Runnable rentTask1 = () -> {
             try {
                 latch.await();
-                Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), newClient, newGame);
+                Rent rent = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), newClient, newGame, "KDMK");
                 rentManager.createRent(rent);
 
                 System.out.println("Rent1 added by thread: " + Thread.currentThread().getName());
@@ -236,7 +239,7 @@ public class RentRepositoryTest {
             try {
                 latch.await();
 
-                Rent rent2 = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), newClient2, newGame);
+                Rent rent2 = new Rent(LocalDate.now(), LocalDate.now().plusDays(9), newClient2, newGame, "KDMK");
                 rentManager2.createRent(rent2);
 
                 System.out.println("Rent2 added by thread: " + Thread.currentThread().getName());

@@ -1,4 +1,4 @@
-package edu.kdmk.kafka;
+package edu.kdmk.sender;
 
 import edu.kdmk.model.Rent;
 import edu.kdmk.model.codec.ClientCodec;
@@ -23,28 +23,21 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-public class RentProducer {
+public class RentSender {
     private final String topicName;
 
-    private KafkaProducer<String, String> producer;
-    //private Gson mapper = new GsonBuilder().registerTypeAdapter(ClientType.class, new ClientTypeInstanceCreator()).create();
+    private final KafkaProducer<String, String> producer;
 
-    public RentProducer(String topicName) {
+    public RentSender(String topicName, KafkaProducer<String, String> producer) throws InterruptedException {
         this.topicName = topicName;
-        initProducer();
-    }
+        this.producer = producer;
 
-    public void initProducer() {
-        Properties producerConfig = new Properties();
-        producerConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-                StringSerializer.class.getName());
-        producerConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                StringSerializer.class.getName());
-        producerConfig.put(ProducerConfig.CLIENT_ID_CONFIG, "local");
-        producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                "kafka1:9192,kafka2:9292,kafka3:9392");
-        producerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
-        producer = new KafkaProducer<>(producerConfig);
+        if (isTopicExist(topicName)) {
+            System.out.println("Topic " + topicName + " exists");
+        } else {
+            System.out.println("Topic " + topicName + " does not exist");
+            createTopic();
+        }
     }
 
     public void createTopic() throws InterruptedException {
@@ -74,37 +67,30 @@ public class RentProducer {
         BsonWriter writer = new BsonDocumentWriter(document);
         codec.encode(writer, rent, EncoderContext.builder().build());
 
-        document.put("rentalCompanyName", new BsonString("KDMK"));
-
         try {
             createTopic();
             ProducerRecord<String, String> record = new ProducerRecord<>(topicName,
                     rent.getId().toString(), document.toJson());
-            System.out.println("Producing rent: " + record);
             Future<RecordMetadata> sent = producer.send(record);
             RecordMetadata recordMetadata = sent.get();
-            System.out.println("Rent sent to partition: " + recordMetadata.partition());
+            System.out.println("Sender: rent sent to partition: " + recordMetadata.partition());
         } catch (InterruptedException  | ExecutionException e) {
             System.out.println(e);
         }
 
     }
 
-    public void isTopicExist(String topicName) {
+    public boolean isTopicExist(String topicName) {
         Properties properties = new Properties();
         properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka1:9192,kafka1:9292,kafka3:9392");
         try (Admin admin = Admin.create(properties)) {
             ListTopicsOptions options = new ListTopicsOptions();
-            ListTopicsResult topics = admin.listTopics(options);
-            KafkaFuture<Set<String>> names = topics.names();
-            Set<String> topicNames = names.get();
-            if (topicNames.contains(topicName)) {
-                System.out.println("Topic " + topicName + " exists");
-            } else {
-                System.out.println("Topic " + topicName + " does not exist");
-            }
+            options.listInternal(true);
+            Set<String> topics = admin.listTopics(options).names().get();
+            return topics.contains(topicName);
         } catch (ExecutionException | InterruptedException e) {
             System.out.println(e);
+            return false;
         }
     }
 

@@ -1,4 +1,4 @@
-package edu.kdmk;
+package edu.kdmk.consumer;
 
 import edu.kdmk.model.Rent;
 import edu.kdmk.model.codec.ClientCodec;

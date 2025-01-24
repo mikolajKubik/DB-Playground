@@ -1,6 +1,7 @@
 package edu.kdmk;
 
 import edu.kdmk.config.MongoConfig;
+import edu.kdmk.consumer.RentConsumer;
 import edu.kdmk.repository.RentRepository;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.junit.jupiter.api.BeforeAll;
@@ -10,7 +11,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class RentConsumerTest {
     private static MongoConfig mongoConfig;

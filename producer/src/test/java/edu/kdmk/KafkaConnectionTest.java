@@ -1,6 +1,5 @@
 package edu.kdmk;
 
-import edu.kdmk.config.KafkaConfig;
 import edu.kdmk.config.MongoConfig;
 import edu.kdmk.manager.ClientManager;
 import edu.kdmk.manager.GameManager;
@@ -22,7 +21,6 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class KafkaConnectionTest {
-    private static KafkaConfig kafkaConfig;
     private static MongoConfig mongoConfig;
     private static ClientManager clientManager;
     private static GameManager gameManager;
@@ -46,7 +44,6 @@ public class KafkaConnectionTest {
         gameRepository = new GameRepository(mongoConfig.getDatabase());
         gameManager = new GameManager(gameRepository);
 
-        kafkaConfig = new KafkaConfig();
         rentProducer = new RentProducer("rents");
 
         rentManager = new RentManager(
@@ -65,9 +62,6 @@ public class KafkaConnectionTest {
             // Close MongoConfig after all tests
             if (mongoConfig != null) {
                 mongoConfig.close();
-            }
-            if (kafkaConfig != null) {
-                kafkaConfig.close();
             }
         } catch (Exception e) {
             e.printStackTrace();

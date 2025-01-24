@@ -3,18 +3,14 @@ package edu.kdmk;
 import edu.kdmk.config.MongoConfig;
 import edu.kdmk.repository.RentRepository;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class RentConsumerTest {
     private static MongoConfig mongoConfig;
@@ -29,7 +25,7 @@ public class RentConsumerTest {
     }
 
     @Test
-    void test1() throws InterruptedException {
+    void test() throws InterruptedException {
 
         RentConsumer rentConsumer = new RentConsumer(rentRepository);
 
@@ -37,27 +33,15 @@ public class RentConsumerTest {
 
         List<KafkaConsumer<UUID, String>> consumers = rentConsumer.getConsumersGroup();
 
-        // Przypisujemy każdego konsumenta do osobnego wątku
-        consumers.forEach(consumer ->
-                executorService.execute(() -> {
-                    try {
-                        rentConsumer.consume(consumer);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        try {
-                            consumer.close();
-                        } catch (Exception closeException) {
-                            closeException.printStackTrace();
-                        }
-                    }
-                })
-        );
-
-        // Czekamy na zakończenie wszystkich wątków
-        executorService.shutdown();
-        if (!executorService.awaitTermination(120, TimeUnit.SECONDS)) {
-            executorService.shutdownNow();
+        for (KafkaConsumer<UUID, String> consumer : consumers) {
+            executorService.execute(() -> {
+                rentConsumer.consume(consumer);
+            });
         }
+        Thread.sleep(100000);
+        for (KafkaConsumer<UUID, String> consumer : consumers) {
+            consumer.close();
+        }
+        executorService.shutdown();
     }
 }

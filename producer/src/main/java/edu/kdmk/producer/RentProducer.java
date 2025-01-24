@@ -28,8 +28,8 @@ public class RentProducer {
 
     public RentProducer(String topicName) throws InterruptedException {
         this.topicName = topicName;
-        initProducer();
         createTopic();
+        initProducer();
     }
 
     public void initProducer() {

@@ -1,6 +1,5 @@
 package edu.kdmk;
 
-import edu.kdmk.config.KafkaConfig;
 import edu.kdmk.config.MongoConfig;
 import edu.kdmk.producer.RentProducer;
 import edu.kdmk.manager.ClientManager;
@@ -37,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class RentRepositoryTest {
 
-    private static KafkaConfig kafkaConfig;
     private static MongoConfig mongoConfig;
     private static ClientManager clientManager;
     private static GameManager gameManager;
@@ -65,7 +63,6 @@ public class RentRepositoryTest {
         inactiveRentRepository = new InactiveRentRepository(mongoConfig.getDatabase());
         inactiveRentManager = new InactiveRentManager(inactiveRentRepository);
 
-        kafkaConfig = new KafkaConfig();
         rentProducer = new RentProducer("rents");
     }
 
@@ -75,9 +72,6 @@ public class RentRepositoryTest {
             // Close MongoConfig after all tests
             if (mongoConfig != null) {
                 mongoConfig.close();
-            }
-            if (kafkaConfig != null) {
-                kafkaConfig.close();
             }
         } catch (Exception e) {
             e.printStackTrace();

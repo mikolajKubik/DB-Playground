@@ -84,19 +84,6 @@ public class RentProducer {
 
     }
 
-//    public boolean isTopicExist(String topicName) {
-//        Properties properties = new Properties();
-//        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka1:9192,kafka1:9292,kafka3:9392");
-//        try (Admin admin = Admin.create(properties)) {
-//            ListTopicsOptions options = new ListTopicsOptions();
-//            options.listInternal(true);
-//            Set<String> topics = admin.listTopics(options).names().get();
-//            return topics.contains(topicName);
-//        } catch (ExecutionException | InterruptedException e) {
-//            System.out.println(e);
-//            return false;
-//        }
-//    }
 
     public void deleteTopic(String topicName) {
         Properties properties = new Properties();

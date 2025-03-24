@@ -2,7 +2,6 @@ package edu.kdmk.models.game;
 
 import edu.kdmk.models.AbstractEntity;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 

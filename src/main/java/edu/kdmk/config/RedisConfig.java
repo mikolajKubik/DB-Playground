@@ -29,12 +29,10 @@
 package edu.kdmk.config;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import lombok.Getter;
 import redis.clients.jedis.DefaultJedisClientConfig;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisClientConfig;
 import redis.clients.jedis.JedisPooled;
-import redis.clients.jedis.json.commands.RedisJsonCommands;
 
 public class RedisConfig {
     private final JedisPooled jedisPooled;

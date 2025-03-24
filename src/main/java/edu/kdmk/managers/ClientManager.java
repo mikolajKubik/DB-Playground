@@ -1,6 +1,5 @@
 package edu.kdmk.managers;
 
-import com.mongodb.client.MongoDatabase;
 import edu.kdmk.models.Client;
 import edu.kdmk.repositories.ClientRepository;
 

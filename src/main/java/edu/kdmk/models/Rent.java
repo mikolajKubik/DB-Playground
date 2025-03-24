@@ -2,7 +2,6 @@ package edu.kdmk.models;
 
 import edu.kdmk.models.game.Game;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.UUID;

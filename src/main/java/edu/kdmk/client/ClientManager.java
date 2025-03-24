@@ -1,7 +1,5 @@
 package edu.kdmk.client;
 
-import com.datastax.oss.driver.api.mapper.annotations.*;
-
 import java.util.List;
 import java.util.UUID;
 

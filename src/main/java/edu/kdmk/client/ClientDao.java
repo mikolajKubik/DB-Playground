@@ -27,19 +27,4 @@ public interface ClientDao {
     @StatementAttributes(consistencyLevel = "ONE", pageSize = 100)
     @Query("SELECT * FROM clients WHERE first_name = :firstName ALLOW FILTERING")
     List<Client> findByFirstName(String firstName);
-
-
-
-//    @StatementAttributes(consistencyLevel = "ONE", pageSize = 100)
-//    @QueryProvider(providerClass = ClientProvider.class, entityHelpers = {Client.class})
-//    Client findByUuid(UUID id);
-
-//    @StatementAttributes(consistencyLevel = "ONE", pageSize = 100)
-//    @QueryProvider(providerClass = ClientProvider.class, entityHelpers = {Client.class})
-//    Client findByUuid(UUID id);
-//
-//    @StatementAttributes(consistencyLevel = "QUORUM")
-//    @QueryProvider(providerClass = ClientProvider.class, entityHelpers = {Client.class})
-//    void create(Client client);
-
 }

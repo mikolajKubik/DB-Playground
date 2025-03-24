@@ -2,7 +2,6 @@ package edu.kdmk.game.model;
 
 import com.datastax.oss.driver.api.mapper.annotations.CqlName;
 import com.datastax.oss.driver.api.mapper.annotations.Entity;
-import com.datastax.oss.driver.api.mapper.annotations.PartitionKey;
 import lombok.*;
 
 import java.util.UUID;

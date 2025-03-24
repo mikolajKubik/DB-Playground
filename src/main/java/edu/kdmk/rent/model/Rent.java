@@ -23,9 +23,6 @@ public class Rent {
 
     private LocalDate endDate;
 
-    //private Client client;
-    //private Game game;
-
     private UUID clientId;
 
     private UUID gameId;
